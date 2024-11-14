@@ -1,99 +1,132 @@
 #include <stdio.h>
+#include <string.h>
 #include <coap3/coap.h>
-#include <arpa/inet.h>
+#include <netdb.h>
 
 #define TU_SERVER_IP "141.30.1.1"
 #define COAP_PROXY_HOST "127.0.0.1"
-#define COAP_PROXY_PORT 12345
+#define COAP_PROXY_PORT "5683"
 
-coap_context_t *create_coap_context() {
-    coap_context_t *ctx = coap_new_context(NULL);
-    if (!ctx) {
-        fprintf(stderr, "Failed to create CoAP context\n");
-        return NULL;
-    }
-    return ctx;
-}
+int resolve_address(const char *host, const char *service, coap_address_t *dst);
+coap_response_t handle_response(coap_session_t *coapSession, const coap_pdu_t *sentPdu, const coap_pdu_t *receivedPdu, const coap_mid_t messageId) {
+    coap_show_pdu(LOG_INFO, receivedPdu);
 
-coap_session_t *create_coap_session(coap_context_t *ctx) {
-    coap_address_t proxy_addr;
-    coap_address_init(&proxy_addr);
+    int* ackReceived = (int*) coap_session_get_app_data(coapSession);
+    *ackReceived = 1;
 
-    // Set the proxy IP address and port for CoAP
-    proxy_addr.addr.sin.sin_family = AF_INET;
-    proxy_addr.addr.sin.sin_port = htons(COAP_PROXY_PORT);
-
-    if (inet_pton(AF_INET, COAP_PROXY_HOST, &proxy_addr.addr.sin.sin_addr) <= 0) {
-        fprintf(stderr, "Invalid proxy IP address: %s\n", COAP_PROXY_HOST);
-        coap_free_context(ctx);
-        return NULL;
-    }
-
-    // Create the CoAP session with the specified proxy address
-    coap_session_t *session = coap_new_client_session(ctx, NULL, &proxy_addr, COAP_PROTO_UDP);
-    if (!session) {
-        fprintf(stderr, "Failed to create CoAP session\n");
-        coap_free_context(ctx);
-        return NULL;
-    }
-
-    return session;
-}
-
-enum coap_response_t handle_coap_response(coap_session_t *session, const coap_pdu_t *sent, const coap_pdu_t *received, const coap_mid_t id) {
-    size_t len;
-    const uint8_t *data;
-
-    // Check if the response has data
-    if (coap_get_data(received, &len, &data)) {
-        printf("Received CoAP response:\n");
-        fwrite(data, 1, len, stdout);  // Print the raw response data
-        printf("\n");
-    } else {
-        printf("No data received in response\n");
-    }
     return COAP_RESPONSE_OK;
 }
+// from https://github.com/obgm/libcoap-minimal/blob/main/common.cc
+int resolve_address(const char *host, const char *service, coap_address_t *dst) {
 
+    struct addrinfo *res, *ainfo;
+    struct addrinfo hints;
+    int error, len=-1;
 
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <hostname>\n", argv[0]);
-        return EXIT_FAILURE;
+    memset(&hints, 0, sizeof(hints));
+    memset(dst, 0, sizeof(*dst));
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_family = AF_UNSPEC;
+
+    error = getaddrinfo(host, service, &hints, &res);
+
+    if (error != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
+        return error;
     }
 
-    coap_startup();
-
-    // Create CoAP context
-    coap_context_t *ctx = create_coap_context();
-    if (!ctx) return EXIT_FAILURE;
-
-    // Create CoAP session to proxy
-    coap_session_t *session = create_coap_session(ctx);
-    if (!session) {
-        coap_free_context(ctx);
-        return EXIT_FAILURE;
+    for (ainfo = res; ainfo != NULL; ainfo = ainfo->ai_next) {
+        switch (ainfo->ai_family) {
+            case AF_INET6:
+            case AF_INET:
+                len = dst->size = ainfo->ai_addrlen;
+                memcpy(&dst->addr.sin6, ainfo->ai_addr, dst->size);
+                goto finish;
+            default:
+                ;
+        }
     }
 
-    // Register the response handler
-    coap_register_response_handler(ctx, handle_coap_response);
-
-    // Send the DNS request over CoAP
-//    send_coap_dns_request(session, argv[1]);
-
-    // Event loop to wait for and process CoAP responses
-    printf("start waiting\n");
-    while (1) {
-        coap_io_process(ctx, COAP_IO_WAIT);  // Wait for events and process them
-    }
-    printf("end waiting\n");
-
-    // Clean up resources
-    coap_session_release(session);
-    coap_free_context(ctx);
-    coap_cleanup();
-    return EXIT_SUCCESS;
+    finish:
+    freeaddrinfo(res);
+    return len;
 }
 
+int main(int argc, char const *argv[]) {
+    int errorCode;
+    int returnCode = 0;
+    coap_context_t* coapContext = NULL;
+    int ackReceived;
+    coap_address_t serverAddress;
+    coap_session_t* coapSession = NULL;
+    coap_pdu_t* pdu;
 
+    coap_startup();
+    coap_set_log_level(LOG_DEBUG);
 
+    errorCode = resolve_address(COAP_PROXY_HOST, COAP_PROXY_PORT, &serverAddress);
+    if (errorCode < 0) {
+        printf("Could not resolve remote address!\n");
+        returnCode = 1;
+        goto cleanup;
+    }
+
+    coapContext = coap_new_context(NULL);
+    if (!coapContext) {
+        printf("Could not create CoAP context!\n");
+        returnCode = 1;
+        goto cleanup;
+    }
+
+    coap_register_response_handler(coapContext, handle_response);
+
+    coapSession = coap_new_client_session(coapContext, NULL, &serverAddress, COAP_PROTO_UDP);
+    if (!coapSession) {
+        printf("Could not create CoAP session!\n");
+
+        returnCode = 1;
+        goto cleanup;
+    }
+
+    coap_session_set_app_data(coapSession, &ackReceived);
+
+    pdu = coap_pdu_init(
+            COAP_MESSAGE_CON,
+            COAP_REQUEST_CODE_GET,
+            coap_new_message_id(coapSession),
+            coap_session_max_pdu_size(coapSession)
+            );
+    if (!pdu) {
+        printf("Could not create CoAP PDU!\n");
+        returnCode = 1;
+        goto cleanup;
+    }
+
+    uint8_t messageToken[8];
+    size_t tokenLength;
+    coap_session_new_token(coapSession, &tokenLength, messageToken);
+    coap_add_token(pdu, tokenLength, messageToken);
+
+char server_uri[50];
+    snprintf(server_uri, sizeof(server_uri), "coap://%s/", COAP_PROXY_HOST);
+    coap_uri_t uri;
+    coap_split_uri(server_uri, strlen(server_uri), &uri);
+    coap_add_option(pdu, COAP_OPTION_URI_PATH, uri.path.length, uri.path.s);
+
+    ackReceived = 0;
+    coap_send(coapSession, pdu);
+    while (!ackReceived) {
+        coap_io_process(coapContext, COAP_IO_WAIT);
+    }
+
+    cleanup:
+    if (coapSession != NULL) {
+        coap_session_release(coapSession);
+    }
+    if (coapContext != NULL) {
+        coap_free_context(coapContext);
+    }
+    coap_cleanup();
+
+    return returnCode;
+}
