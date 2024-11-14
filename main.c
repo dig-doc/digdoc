@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <coap3/coap.h>
+#include <arpa/inet.h>
 
 #define TU_SERVER_IP "141.30.1.1"
 #define COAP_PROXY_HOST "127.0.0.1"
@@ -21,6 +22,7 @@ coap_session_t *create_coap_session(coap_context_t *ctx) {
     // Set the proxy IP address and port for CoAP
     proxy_addr.addr.sin.sin_family = AF_INET;
     proxy_addr.addr.sin.sin_port = htons(COAP_PROXY_PORT);
+
     if (inet_pton(AF_INET, COAP_PROXY_HOST, &proxy_addr.addr.sin.sin_addr) <= 0) {
         fprintf(stderr, "Invalid proxy IP address: %s\n", COAP_PROXY_HOST);
         coap_free_context(ctx);
@@ -38,18 +40,19 @@ coap_session_t *create_coap_session(coap_context_t *ctx) {
     return session;
 }
 
-void handle_coap_response(coap_context_t *ctx, coap_session_t *session, coap_pdu_t *response) {
+enum coap_response_t handle_coap_response(coap_session_t *session, const coap_pdu_t *sent, const coap_pdu_t *received, const coap_mid_t id) {
     size_t len;
     const uint8_t *data;
 
     // Check if the response has data
-    if (coap_get_data(response, &len, &data)) {
+    if (coap_get_data(received, &len, &data)) {
         printf("Received CoAP response:\n");
         fwrite(data, 1, len, stdout);  // Print the raw response data
         printf("\n");
     } else {
         printf("No data received in response\n");
     }
+    return COAP_RESPONSE_OK;
 }
 
 
