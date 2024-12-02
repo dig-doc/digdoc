@@ -8,8 +8,9 @@
 
 #define DNS_PACKAGE_SIZE 512
 
-// TODO: get IPv6 as server
 // TODO: format output
+// TODO: get away that OPTION on the help page (--help and --usage), make -h work
+// TODO: sprintf
 
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentPdu, const coap_pdu_t *receivedPdu, const coap_mid_t messageId) {
     (void) session;
@@ -56,9 +57,19 @@ int do_dns_stuff(struct arguments args, void *buffer){
     ldns_rr_list *a_records;       // list of DNS Resource Records
     ldns_rdf *ns;           // nameserver
     ldns_buffer *buf;
+    enum ldns_enum_rdf_type type = LDNS_RDF_TYPE_A;
 
     domain = ldns_dname_new_frm_str(args.domain);
-    ns = ldns_rdf_new_frm_str(LDNS_RDF_TYPE_A, args.nameserver);
+    if(args.nameserver[0] == '[') {
+        type = LDNS_RDF_TYPE_AAAA;
+        char *tmp = malloc(sizeof(char) * strlen(args.nameserver));
+        strcpy(tmp, args.nameserver);
+        tmp++;
+        tmp[strlen(tmp)-1] = '\0';
+        ns = ldns_rdf_new_frm_str(type, tmp);
+    } else{
+        ns = ldns_rdf_new_frm_str(type, args.nameserver);
+    }
 
     res = ldns_resolver_new();
 
@@ -114,12 +125,20 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             if (state->arg_num == 0) {
                 if (arg[0] == '@') {
                     char *test = arg+1;
-                    if(!(ldns_rdf_new_frm_str(LDNS_RDF_TYPE_A, test)|| ldns_rdf_new_frm_str(LDNS_RDF_TYPE_AAAA, test))){
-                        printf("%s is not a valid IP address\n", test);
+                    if(test[0] == '['){
+                        char *tmp = malloc(sizeof(char) * strlen(test));
+                        strcpy(tmp, test);
+                        tmp++;
+                        tmp[strlen(tmp)-1] = '\0';
+                        if(!(ldns_rdf_new_frm_str(LDNS_RDF_TYPE_AAAA, tmp))){
+                            printf("%s is not a valid IPv6 address\n", test);
+                            exit(1);
+                        }
+                    } else if(!(ldns_rdf_new_frm_str(LDNS_RDF_TYPE_A, test))){
+                        printf("%s is not a valid IPv4 address\n", test);
                         exit(1);
-                    } else {
-                        args->nameserver = arg + 1; // Skip the '@'
                     }
+                    args->nameserver = arg + 1; // Skip the '@'
                 } else {
                     if(ldns_dname_new_frm_str(arg)){
                         args->domain = arg;
@@ -215,14 +234,11 @@ int main(int argc, char **argv) {
     coap_set_log_level(args.verbose ? COAP_LOG_DEBUG : COAP_LOG_WARN);
 
     char *server_uri = malloc(sizeof(char) * 100);
-    strcat(server_uri, "coap://");
-    strcat(server_uri, args.nameserver);
-    strcat(server_uri, ":");
-    char *prt = malloc(sizeof(char) * 100);
-    sprintf(prt, "%d", args.port);
-    strcat(server_uri, prt);
-    strcat(server_uri, "/dns");
-    printf("uri: %s\n", server_uri);
+    sprintf(server_uri, "coap://%s:%d/dns", args.nameserver, args.port);
+
+    if(args.verbose){
+        printf("server IP: %s\nport: %d\ndomain: %s\nrecord type: %s\nclass: %s\n", args.nameserver, args.port, args.domain, args.record_type, args.class);
+    }
 
     int len = coap_split_uri((const unsigned char *)server_uri, strlen(server_uri), &uri);
     if (len != 0) {
