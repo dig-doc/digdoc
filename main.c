@@ -5,14 +5,42 @@
 #include <ldns/ldns.h>
 #include <coap3/coap.h>
 #include <coap3/coap_debug.h>
+#include <time.h>
 
 #define DNS_PACKAGE_SIZE 512
 
-// TODO: format output
+clock_t start;
+
 // TODO: get away that OPTION on the help page (--help and --usage), make -h work
-// TODO: sprintf
+
+void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
+    ldns_rr_list *rrList = ldns_pkt_question(pkt);
+    if(rrList->_rr_count > 0){
+        printf("\n;; QUESTION SECTION:\n;");
+    }
+    ldns_rr_list_print(stdout, rrList);
+    rrList = ldns_pkt_answer(pkt);
+    if(rrList->_rr_count > 0){
+        printf("\n;; ANSWER SECTION:\n");
+    }
+    ldns_rr_list_print(stdout, rrList);
+    rrList = ldns_pkt_authority(pkt);
+    if(rrList->_rr_count > 0){
+        printf("\n;; AUTHORITY SECTION:\n");
+    }
+    ldns_rr_list_print(stdout, rrList);
+    rrList = ldns_pkt_additional(pkt);
+    if(rrList->_rr_count > 0){
+        printf("\n;; ADDITIONAL SECTION:\n");
+    }
+    ldns_rr_list_print(stdout, rrList);
+    printf("\nQuery time: %dus", query_time);
+    printf("\nDNS PKT SIZE rcvd: %ld\n", dns_length);
+}
 
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentPdu, const coap_pdu_t *receivedPdu, const coap_mid_t messageId) {
+    clock_t end = clock();
+
     (void) session;
     (void) sentPdu;
     (void) messageId;
@@ -32,9 +60,7 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentP
     ldnsBuffer = ldns_buffer_new(DNS_PACKAGE_SIZE);
     ldns_buffer_write(ldnsBuffer, data, len);
     ldns_buffer2pkt_wire(&pkt, ldnsBuffer);
-
-    ldns_rr_list *a_records = ldns_pkt_all(pkt);
-    ldns_rr_list_print(stdout, a_records);
+    print_output(pkt, total, ((double )(end-start))/CLOCKS_PER_SEC*1000*1000);
 
     return COAP_RESPONSE_OK;
 }
@@ -344,9 +370,10 @@ int main(int argc, char **argv) {
     }
 
     coap_add_data(pdu, len, buffer);
-
+    start = clock();
     coap_send(session, pdu);
     // while (true)
+
     coap_io_process(context, COAP_IO_WAIT);
 
     cleanup:
