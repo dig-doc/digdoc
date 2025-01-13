@@ -34,8 +34,8 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
         printf("\n;; ADDITIONAL SECTION:\n");
     }
     ldns_rr_list_print(stdout, rrList);
-    printf("\nQuery time: %dus", query_time);
-    printf("\nDNS PKT SIZE rcvd: %ld\n", dns_length);
+    printf("\n;; Query time: %dus", query_time);
+    printf("\n;; DNS PKT SIZE rcvd: %ld\n", dns_length);
 }
 
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentPdu, const coap_pdu_t *receivedPdu, const coap_mid_t messageId) {

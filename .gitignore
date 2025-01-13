@@ -2,6 +2,8 @@
 *.d
 cmake-build-debug/
 .idea/
+.venv/
+.vscode/
 
 # Object files
 *.o
