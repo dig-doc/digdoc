@@ -28,6 +28,7 @@ fi
 
 pip install pexpect
 
+# run 2 instances of the proxy, one expecting CoAP (from digdoc) and one UDP (from dig)
 aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" "" > /dev/null 2>&1 &
 aiodns-proxy --udp 127.0.0.2 8001 --upstream-dns 1.1.1.1 --dtls-credentials "" "" > /dev/null 2>&1 &
 
