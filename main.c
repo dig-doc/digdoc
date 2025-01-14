@@ -7,12 +7,11 @@
 #include <coap3/coap_debug.h>
 #include <time.h>
 
-#define DNS_PACKAGE_SIZE 512
+#define DNS_PACKET_SIZE 512
 
 clock_t start;
 
-// TODO: get away that OPTION on the help page (--help and --usage), make -h work
-
+// access the DNS packet and print it
 void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
     ldns_rr_list *rrList = ldns_pkt_question(pkt);
     if(rrList->_rr_count > 0){
@@ -38,9 +37,11 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
     printf("\n;; DNS PKT SIZE rcvd: %ld\n", dns_length);
 }
 
+// function that is automatically called when a CoAP response is received
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentPdu, const coap_pdu_t *receivedPdu, const coap_mid_t messageId) {
     clock_t end = clock();
 
+    // not used here but need to be in function arguments
     (void) session;
     (void) sentPdu;
     (void) messageId;
@@ -49,16 +50,20 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentP
 
     const uint8_t *buffer;
     size_t len, off, total;
+    // put the received message in a buffer -> just use the body which is "normal" DNS
     if (!coap_get_data_large(receivedPdu, &len, &buffer, &off, &total)) {
         printf("No response.\n");
         return COAP_RESPONSE_OK;
     }
+    // interpret 8bit int as 16bit for decoding
     const uint16_t* data = (const uint16_t*)buffer;
 
     ldns_buffer *ldnsBuffer;
     ldns_pkt *pkt;
-    ldnsBuffer = ldns_buffer_new(DNS_PACKAGE_SIZE);
+    ldnsBuffer = ldns_buffer_new(DNS_PACKET_SIZE);
+    // write data in an ldnsBuffer
     ldns_buffer_write(ldnsBuffer, data, len);
+    // ldnsBuffer in wire format can be converted in a DNS packet
     ldns_buffer2pkt_wire(&pkt, ldnsBuffer);
     print_output(pkt, total, ((double )(end-start))/CLOCKS_PER_SEC*1000*1000);
 
@@ -75,7 +80,8 @@ struct arguments {
     int port;
 };
 
-int do_dns_stuff(struct arguments args, void *buffer){
+// build a "normal" DNS packet for putting it in the body of a CoAP packet
+int prepare_dns_packet(struct arguments args, void *buffer){
     ldns_resolver *res;     // keeps a list of nameservers, and can perform queries for us
     ldns_rdf *domain;       // store the name the user specifies when calling the program
     ldns_pkt *p;            // dns packet, e.g. a complete query or an answer
@@ -85,6 +91,7 @@ int do_dns_stuff(struct arguments args, void *buffer){
     ldns_buffer *buf;
     enum ldns_enum_rdf_type type = LDNS_RDF_TYPE_A;
 
+    // interpret command line arguments as ldns structures
     domain = ldns_dname_new_frm_str(args.domain);
     if(args.nameserver[0] == '[') {
         type = LDNS_RDF_TYPE_AAAA;
@@ -97,34 +104,31 @@ int do_dns_stuff(struct arguments args, void *buffer){
         ns = ldns_rdf_new_frm_str(type, args.nameserver);
     }
 
+    // create a resolver structure
     res = ldns_resolver_new();
 
+    // push a new nameserver to the resolver
     ldns_resolver_push_nameserver(res, ns);
+    // set the port the resolver should use
     ldns_resolver_set_port(res, args.port);
 
+    // create the DNS packet
     q = ldns_pkt_query_new(domain, ldns_get_rr_type_by_name(args.record_type), ldns_get_rr_class_by_name(args.class), LDNS_RD);
 
     buf = ldns_buffer_new(512);
 
+    // convert the packet in a buffer in wire format
     ldns_pkt2buffer_wire(buf, q);
-//    ldns_pkt2buffer_str(buf, q);
 
+    // interpret buffer as 8bit int
     uint8_t *data = ldns_buffer_begin(buf);
 
     size_t len = ldns_buffer_position(buf);
 
+    // copy the local data buffer to the buffer in main
     memcpy(buffer, data, len);
-//    buffer = data;
-//    printf("buffer: %p\n", buffer);
+
     return len;
-//    printf("%s\n", ldns_buffer2str(buf));
-//    printf("hm\n");
-/*
-    p = ldns_resolver_query(res, domain, ldns_get_rr_type_by_name(args.record_type), ldns_get_rr_class_by_name(args.class), LDNS_RD);
-
-    a_records = ldns_pkt_authority(p);
-
-    ldns_rr_list_print(stdout, a_records);*/
 }
 
 // The options that the program supports
@@ -149,6 +153,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case ARGP_KEY_ARG:
             if (state->arg_num == 0) {
+                // first argument is a nameserver
                 if (arg[0] == '@') {
                     char *test = arg+1;
                     if(test[0] == '['){
@@ -165,7 +170,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                         exit(1);
                     }
                     args->nameserver = arg + 1; // Skip the '@'
-                } else {
+                } else {    // interpret first argument as domain name, record type or class
                     if(ldns_dname_new_frm_str(arg)){
                         args->domain = arg;
                     } else if(ldns_get_rr_type_by_name(arg)){
@@ -177,7 +182,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                         exit(1);
                     }
                 }
-            } else if (state->arg_num == 1) {
+            } else if (state->arg_num == 1) {   // interpret second argument as domain name, record type or class
                 if(ldns_dname_new_frm_str(arg) && args->domain == NULL){
                     args->domain = arg;
                 } else if(ldns_get_rr_type_by_name(arg) && args->record_type == NULL){
@@ -188,7 +193,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                     printf("%s is no valid argument\n", arg);
                     exit(1);
                 }
-            } else if (state->arg_num == 2) {
+            } else if (state->arg_num == 2) {   // interpret third argument as record type or class
                 if(ldns_get_rr_type_by_name(arg) && args->record_type == NULL){
                     args->record_type = arg;
                 } else if(ldns_get_rr_class_by_name(arg) && args->class == NULL){
@@ -197,7 +202,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                     printf("%s is no valid argument\n", arg);
                     exit(1);
                 }
-            } else if (state->arg_num == 3) {
+            } else if (state->arg_num == 3) {   // interpret fourth argument as class
                 if(ldns_get_rr_class_by_name(arg) && args->class == NULL){
                     args->class = arg;
                 } else{
@@ -228,7 +233,6 @@ static struct argp argp = {
         "A commandline tool that sends a DNS request over CoAP to a server", // Program documentation
 };
 
-// Main program
 int main(int argc, char **argv) {
     struct arguments args;
     args.verbose = 0;
@@ -241,6 +245,7 @@ int main(int argc, char **argv) {
     // Parse the arguments
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
+    // default values
     if(args.nameserver == NULL) args.nameserver = "127.0.0.1";
     if(args.domain == NULL) args.domain = "example.org";
     if(args.record_type == NULL) args.record_type = "A";
@@ -256,9 +261,12 @@ int main(int argc, char **argv) {
     coap_addr_info_t *addr_info;
     coap_optlist_t *optlist = NULL;
 
+    // always needs to be done at the beginning
     coap_startup();
+    // set log level depending on verbose option
     coap_set_log_level(args.verbose ? COAP_LOG_DEBUG : COAP_LOG_WARN);
 
+    // from domain name create a server uri with a specific syntax
     char *server_uri = malloc(sizeof(char) * 100);
     sprintf(server_uri, "coap://%s:%d/dns", args.nameserver, args.port);
 
@@ -266,6 +274,7 @@ int main(int argc, char **argv) {
         printf("server IP: %s\nport: %d\ndomain: %s\nrecord type: %s\nclass: %s\n", args.nameserver, args.port, args.domain, args.record_type, args.class);
     }
 
+    // parse server uri into uri components
     int len = coap_split_uri((const unsigned char *)server_uri, strlen(server_uri), &uri);
     if (len != 0) {
         coap_log_warn("Failed to parse uri '%s'\n", server_uri);
@@ -297,6 +306,8 @@ int main(int argc, char **argv) {
         goto cleanup;
     }
 
+    // if wanting to use DTLS, use the following instructions (currently not supported):
+    //
     // https://github.com/obgm/libcoap/blob/develop/examples/lwip/client-coap.c
     // char* dtls_id = "client_identity";
     // char* dtls_key = "psk";
@@ -314,14 +325,18 @@ int main(int argc, char **argv) {
     // dtls_psk.psk_info.key.length = strlen(dtls_key);
 
     // session = coap_new_client_session_psk2(context, NULL, &dst, COAP_PROTO_DTLS, &dtls_psk);
-    session = coap_new_client_session(context, NULL, &dst, COAP_PROTO_UDP); /* COAP_PROTO_DTLS / COAP_PROTO_UDP */
+
+    // create a new coap session that saves the current state
+    session = coap_new_client_session(context, NULL, &dst, COAP_PROTO_UDP);
     if (!session) {
         coap_log_warn("Could not create CoAP session!\n");
         returnCode = 1;
         goto cleanup;
     }
+    // register response handler which is called when a CoAP packet is received
     coap_register_response_handler(context, handle_response);
 
+    // create a PDU = Protocol Data Unit
     pdu = coap_pdu_init(
             COAP_MESSAGE_CON, /* COAP_MESSAGE_NON */
             COAP_REQUEST_CODE_FETCH,
@@ -334,10 +349,13 @@ int main(int argc, char **argv) {
         goto cleanup;
     }
 
-    unsigned char buffer[DNS_PACKAGE_SIZE];
+    // buffer where the DNS packet will be put in -> later put in the body of the CoAP packet
+    unsigned char buffer[DNS_PACKET_SIZE];
 
     // coap_add_option(pdu, COAP_OPTION_URI_PATH, uri.path.length, uri.path.s);
-    int res = coap_uri_into_options(&uri, &dst, &optlist, 1, buffer, DNS_PACKAGE_SIZE);
+    
+    // takes a coap_uri_t and then adds CoAP options into the optlist_chain
+    int res = coap_uri_into_options(&uri, &dst, &optlist, 1, buffer, DNS_PACKET_SIZE);
     if (res < 0) {
         printf("Failed to create options!\n");
         returnCode = 1;
@@ -347,11 +365,13 @@ int main(int argc, char **argv) {
     // https://datatracker.ietf.org/doc/html/rfc7252#section-5.10
     // 553 = application/dns-message
     // buffer needs at least size 2
-    len = coap_encode_var_safe(buffer, DNS_PACKAGE_SIZE, 553);
+    len = coap_encode_var_safe(buffer, DNS_PACKET_SIZE, 553);
 
+    // add optlist to the given optlist_chain
     coap_insert_optlist(&optlist, coap_new_optlist(COAP_OPTION_CONTENT_FORMAT, len, buffer));
     coap_insert_optlist(&optlist, coap_new_optlist(COAP_OPTION_ACCEPT, len, buffer));
 
+    // optlist of optlist_chain is added to the PDU
     res = coap_add_optlist_pdu(pdu, &optlist);
     if (res == 0) {
         printf("Failed to add options to PDU!\n");
@@ -359,9 +379,8 @@ int main(int argc, char **argv) {
         goto cleanup;
     }
 
-    /* Add the DNS query payload (e.g., "example.org") */
-//    len = build_dns_packet(arguments.type, arguments.host, buffer, 1024);
-    len = do_dns_stuff(args, buffer);
+    // prepare the DNS packet
+    len = prepare_dns_packet(args, buffer);
 
     if (len < 0) {
         printf("Failed to build DNS packet!\n");
@@ -369,11 +388,13 @@ int main(int argc, char **argv) {
         goto cleanup;
     }
 
+    // add the DNS packet to the body of the CoAP packet
     coap_add_data(pdu, len, buffer);
+    // timer for query time
     start = clock();
+    // send the CoAP packet
     coap_send(session, pdu);
-    // while (true)
-
+    // wait for receiving a CoAP response
     coap_io_process(context, COAP_IO_WAIT);
 
     cleanup:
