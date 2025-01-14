@@ -13,7 +13,6 @@ digdoc is a lightweight command-line tool written in C that acts as a DNS-over-C
 `gcc main.c -o digdoc -lcoap-3-gnutls -lldns`
 
 ### Running Tests
-
 `./test.sh`
 
 ## run aiodns-proxy:
