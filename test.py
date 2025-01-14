@@ -1,113 +1,45 @@
 import pexpect
 
-client_child = pexpect.spawn(f'./digdoc @127.0.0.1 agdsn.de A -p 8000')
+def test_query(digdoc_cmd, dig_cmd, description):
+    """Run a test query with digdoc and dig, compare outputs."""
+    # Run digdoc command
+    client_child = pexpect.spawn(digdoc_cmd)
+    client_child.expect(pexpect.EOF)
+    client_output = client_child.before.decode('utf-8')
 
-client_child.expect(pexpect.EOF)
+    # Run dig command
+    dig_child = pexpect.spawn(dig_cmd)
+    dig_child.expect(pexpect.EOF)
+    dig_output = dig_child.before.decode('utf-8')
 
-dig_child = pexpect.spawn(f'dig @127.0.0.2 agdsn.de A -p 8001 +short')
+    # Print results
+    print(f"\n--------------------------------------------------------\n{description}\n\nDigdoc query:\n{client_output}")
+    print("-----")
+    print(f"Dig query:\n\n{dig_output}")
 
-dig_child.expect(pexpect.EOF)
+    # Check if dig output is contained in digdoc output
+    dig_lines = dig_output.strip().split('\n')
+    contains = all(line in client_output for line in dig_lines)
 
-client_output = client_child.before.decode('utf-8')
-dig_output = dig_child.before.decode('utf-8')
+    if contains:
+        print("-----\n\033[32mTest passed!\033[0m\n--------------------------------------------------------")
+    else:
+        for line in dig_lines:
+            if line not in client_output:
+                print(f"Not found: {line}")
+        print("-----\n\033[31mTest failed!\033[0m\n--------------------------------------------------------")
 
-# Optional: Print full interaction log for debugging
-print(client_output)
-print("-----")
-print(dig_output)
 
-dig_lines = dig_output.strip().split('\n')
-contains = True
-for line in dig_lines:
-    if line not in client_output:
-        print(f"Not found: {line}")
-        contains = False
+# Define test cases
+test_cases = [
+    ("./digdoc @127.0.0.1 agdsn.de A -p 8000", "dig @127.0.0.2 agdsn.de A -p 8001 +short", "Testing A record"),
+    ("./digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000", "dig @127.0.0.2 ftp.agdsn.de AAAA -p 8001 +short", "Testing AAAA record"),
+    ("./digdoc @127.0.0.1 130.119.76.141.in-addr.arpa PTR -p 8000", "dig @127.0.0.2 -x 141.76.119.130 -p 8001 +short", "Testing PTR record"),
+    ("./digdoc @127.0.0.1 agdsn.de TXT -p 8000", "dig @127.0.0.2 agdsn.de TXT -p 8001 +short", "Testing TXT record"),
+    ("./digdoc @127.0.0.1 agdsn.de MX -p 8000", "dig @127.0.0.2 agdsn.de MX -p 8001 +short", "Testing MX record"),
+    ("./digdoc @127.0.0.1 agdsn.de NS -p 8000", "dig @127.0.0.2 agdsn.de NS -p 8001 +short", "Testing NS record"),
+]
 
-if contains:
-    print("Test passed!")
-else:
-    print("Test failed!")
-# NS, PTR?, TXT?
-client_child = pexpect.spawn(f'./digdoc @127.0.0.1 agdsn.de TXT  -p 8000')
-
-client_child.expect(pexpect.EOF)
-
-dig_child = pexpect.spawn(f'dig @127.0.0.2 agdsn.de TXT -p 8001 +short')
-
-dig_child.expect(pexpect.EOF)
-
-client_output = client_child.before.decode('utf-8')
-dig_output = dig_child.before.decode('utf-8')
-
-# Optional: Print full interaction log for debugging
-print(client_output)
-print("-----")
-print(dig_output)
-
-dig_lines = dig_output.strip().split('\n')
-contains = True
-for line in dig_lines:
-    if line not in client_output:
-        print(f"Not found: {line}")
-        contains = False
-
-if contains:
-    print("Test passed!")
-else:
-    print("Test failed!")
-
-client_child = pexpect.spawn(f'./digdoc @127.0.0.1 agdsn.de MX -p 8000')
-
-client_child.expect(pexpect.EOF)
-
-dig_child = pexpect.spawn(f'dig @127.0.0.2 agdsn.de MX -p 8001 +short')
-
-dig_child.expect(pexpect.EOF)
-
-client_output = client_child.before.decode('utf-8')
-dig_output = dig_child.before.decode('utf-8')
-
-# Optional: Print full interaction log for debugging
-print(client_output)
-print("-----")
-print(dig_output)
-
-dig_lines = dig_output.strip().split('\n')
-contains = True
-for line in dig_lines:
-    if line not in client_output:
-        print(f"Not found: {line}")
-        contains = False
-
-if contains:
-    print("Test passed!")
-else:
-    print("Test failed!")
-
-client_child = pexpect.spawn(f'./digdoc @127.0.0.1 agdsn.de NS -p 8000')
-
-client_child.expect(pexpect.EOF)
-
-dig_child = pexpect.spawn(f'dig @127.0.0.2 agdsn.de NS -p 8001 +short')
-
-dig_child.expect(pexpect.EOF)
-
-client_output = client_child.before.decode('utf-8')
-dig_output = dig_child.before.decode('utf-8')
-
-# Optional: Print full interaction log for debugging
-print(client_output)
-print("-----")
-print(dig_output)
-
-dig_lines = dig_output.strip().split('\n')
-contains = True
-for line in dig_lines:
-    if line not in client_output:
-        print(f"Not found: {line}")
-        contains = False
-
-if contains:
-    print("Test passed!")
-else:
-    print("Test failed!")
+# Run tests
+for digdoc_cmd, dig_cmd, description in test_cases:
+    test_query(digdoc_cmd, dig_cmd, description)

@@ -2,12 +2,19 @@
 
 digdoc is a lightweight command-line tool written in C that acts as a DNS-over-CoAP (DoC) client. Since most common DNS servers do not natively support CoAP, digdoc currently uses the aiodns-proxy project to translate CoAP packets into standard UDP-based DNS queries.
 
-## prerequisites:
+## Prerequisites:
 
-- build the project: `gcc main.c -o digdoc -lcoap-3-gnutls -lldns`
+- install libraries: `sudo apt install libcoap3-dev libldns-dev`
 - create a python virtual environment: `python -m venv .venv`
 - activate the venv: `source .venv/bin/activate`
 - install aiodns-proxy: `pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/`
+
+### Build the project
+`gcc main.c -o digdoc -lcoap-3-gnutls -lldns`
+
+### Running Tests
+
+`./test.sh`
 
 ## run aiodns-proxy:
 run the aiodns-proxy using the CoAP protocol for reaching e.g. via port 8000 the cloudflare DNS server:
@@ -17,7 +24,7 @@ run the aiodns-proxy using the CoAP protocol for reaching e.g. via port 8000 the
 Note: for using IPv6, replace `localhost` with `::1`
 
 ## run didoc:
-in a new terminal, digdoc can be used e.g. like that:
+in a second terminal, digdoc can be used e.g. like that:
 
 ` ./digdoc @127.0.0.1 example.org A`
 
