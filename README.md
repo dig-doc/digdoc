@@ -4,6 +4,7 @@
 
 ## Prerequisites:
 
+- basic building tools: python3.12-venv, autoconf
 - install libraries: `sudo apt install libcoap3-dev libldns-dev`
 - create a python virtual environment: `python -m venv .venv`
 - activate the venv: `source .venv/bin/activate`
@@ -18,7 +19,7 @@
 Note: Since testing for hardcoded IP-addresses is not meaningful, we assume that the DNS lookup utility *dig* correctly works and compare its results with the results of *digdoc*. 
 
 ## run aiodns-proxy:
-run the aiodns-proxy using the CoAP protocol for reaching e.g. via port 8000 the cloudflare DNS server:
+run the aiodns-proxy using the CoAP protocol for reaching e.g. via port 8000 the Cloudflare DNS server:
 
 `aiodns-proxy --coap localhost 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" ""`
 

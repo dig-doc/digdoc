@@ -32,12 +32,12 @@ def test_query(digdoc_cmd, dig_cmd, description):
 
 # Define test cases
 test_cases = [
-    ("./digdoc @127.0.0.1 agdsn.de A -p 8000", "dig @127.0.0.2 agdsn.de A -p 8001 +short", "Testing A record"),
-    ("./digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000", "dig @127.0.0.2 ftp.agdsn.de AAAA -p 8001 +short", "Testing AAAA record"),
-    ("./digdoc @127.0.0.1 130.119.76.141.in-addr.arpa PTR -p 8000", "dig @127.0.0.2 -x 141.76.119.130 -p 8001 +short", "Testing PTR record"),
-    ("./digdoc @127.0.0.1 agdsn.de TXT -p 8000", "dig @127.0.0.2 agdsn.de TXT -p 8001 +short", "Testing TXT record"),
-    ("./digdoc @127.0.0.1 agdsn.de MX -p 8000", "dig @127.0.0.2 agdsn.de MX -p 8001 +short", "Testing MX record"),
-    ("./digdoc @127.0.0.1 agdsn.de NS -p 8000", "dig @127.0.0.2 agdsn.de NS -p 8001 +short", "Testing NS record"),
+    ("./digdoc @127.0.0.1 agdsn.de A -p 8000", "dig @1.1.1.1 agdsn.de A +short", "Testing A record"),
+    ("./digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000", "dig @1.1.1.1 ftp.agdsn.de AAAA +short", "Testing AAAA record"),
+    ("./digdoc @127.0.0.1 130.119.76.141.in-addr.arpa PTR -p 8000", "dig @1.1.1.1 -x 141.76.119.130 +short", "Testing PTR record"),
+    ("./digdoc @127.0.0.1 agdsn.de TXT -p 8000", "dig @1.1.1.1 agdsn.de TXT +short", "Testing TXT record"),
+    ("./digdoc @127.0.0.1 agdsn.de MX -p 8000", "dig @1.1.1.1 agdsn.de MX +short", "Testing MX record"),
+    ("./digdoc @127.0.0.1 agdsn.de NS -p 8000", "dig @1.1.1.1 agdsn.de NS +short", "Testing NS record"),
 ]
 
 # Run tests
