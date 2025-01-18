@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pexpect
 
 def test_query(digdoc_cmd, dig_cmd, description):

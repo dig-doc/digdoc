@@ -7,64 +7,65 @@
 #include <coap3/coap_debug.h>
 #include <time.h>
 
-#define DNS_PACKET_SIZE 512
+#define DNS_PACKET_SIZE 512U
+#define DIGDOC_CF_DNS 553U
 
 clock_t start;
 
 // access the DNS packet and print it
 void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
-    ldns_rr_list *rrList = ldns_pkt_question(pkt);
-    if(rrList->_rr_count > 0){
+    ldns_rr_list *rr_list = ldns_pkt_question(pkt);
+    if(rr_list->_rr_count > 0){
         printf("\n;; QUESTION SECTION:\n;");
     }
-    ldns_rr_list_print(stdout, rrList);
-    rrList = ldns_pkt_answer(pkt);
-    if(rrList->_rr_count > 0){
+    ldns_rr_list_print(stdout, rr_list);
+    rr_list = ldns_pkt_answer(pkt);
+    if(rr_list->_rr_count > 0){
         printf("\n;; ANSWER SECTION:\n");
     }
-    ldns_rr_list_print(stdout, rrList);
-    rrList = ldns_pkt_authority(pkt);
-    if(rrList->_rr_count > 0){
+    ldns_rr_list_print(stdout, rr_list);
+    rr_list = ldns_pkt_authority(pkt);
+    if(rr_list->_rr_count > 0){
         printf("\n;; AUTHORITY SECTION:\n");
     }
-    ldns_rr_list_print(stdout, rrList);
-    rrList = ldns_pkt_additional(pkt);
-    if(rrList->_rr_count > 0){
+    ldns_rr_list_print(stdout, rr_list);
+    rr_list = ldns_pkt_additional(pkt);
+    if(rr_list->_rr_count > 0){
         printf("\n;; ADDITIONAL SECTION:\n");
     }
-    ldns_rr_list_print(stdout, rrList);
+    ldns_rr_list_print(stdout, rr_list);
     printf("\n;; Query time: %dus", query_time);
     printf("\n;; DNS PKT SIZE rcvd: %ld\n", dns_length);
 }
 
 // function that is automatically called when a CoAP response is received
-coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sentPdu, const coap_pdu_t *receivedPdu, const coap_mid_t messageId) {
+coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_pdu, const coap_pdu_t *received_pdu, const coap_mid_t message_id) {
     clock_t end = clock();
 
     // not used here but need to be in function arguments
     (void) session;
-    (void) sentPdu;
-    (void) messageId;
+    (void) sent_pdu;
+    (void) message_id;
 
-    coap_show_pdu(LOG_INFO, receivedPdu);
+    coap_show_pdu(LOG_INFO, received_pdu);
 
     const uint8_t *buffer;
     size_t len, off, total;
     // put the received message in a buffer -> just use the body which is "normal" DNS
-    if (!coap_get_data_large(receivedPdu, &len, &buffer, &off, &total)) {
+    if (!coap_get_data_large(received_pdu, &len, &buffer, &off, &total)) {
         printf("No response.\n");
         return COAP_RESPONSE_OK;
     }
     // interpret 8bit int as 16bit for decoding
     const uint16_t* data = (const uint16_t*)buffer;
 
-    ldns_buffer *ldnsBuffer;
+    ldns_buffer *ldns_buffer;
     ldns_pkt *pkt;
-    ldnsBuffer = ldns_buffer_new(DNS_PACKET_SIZE);
+    ldns_buffer = ldns_buffer_new(DNS_PACKET_SIZE);
     // write data in an ldnsBuffer
-    ldns_buffer_write(ldnsBuffer, data, len);
+    ldns_buffer_write(ldns_buffer, data, len);
     // ldnsBuffer in wire format can be converted in a DNS packet
-    ldns_buffer2pkt_wire(&pkt, ldnsBuffer);
+    ldns_buffer2pkt_wire(&pkt, ldns_buffer);
     print_output(pkt, total, ((double )(end-start))/CLOCKS_PER_SEC*1000*1000);
 
     return COAP_RESPONSE_OK;
@@ -81,7 +82,7 @@ struct arguments {
 };
 
 // build a "normal" DNS packet for putting it in the body of a CoAP packet
-int prepare_dns_packet(struct arguments args, void *buffer){
+int prepare_dns_packet(struct arguments *args, void *buffer){
     ldns_resolver *res;     // keeps a list of nameservers, and can perform queries for us
     ldns_rdf *domain;       // store the name the user specifies when calling the program
     ldns_pkt *p;            // dns packet, e.g. a complete query or an answer
@@ -92,16 +93,16 @@ int prepare_dns_packet(struct arguments args, void *buffer){
     enum ldns_enum_rdf_type type = LDNS_RDF_TYPE_A;
 
     // interpret command line arguments as ldns structures
-    domain = ldns_dname_new_frm_str(args.domain);
-    if(args.nameserver[0] == '[') {
+    domain = ldns_dname_new_frm_str(args->domain);
+    if(args->nameserver[0] == '[') {
         type = LDNS_RDF_TYPE_AAAA;
-        char *tmp = malloc(sizeof(char) * strlen(args.nameserver));
-        strcpy(tmp, args.nameserver);
+        char *tmp = malloc(sizeof(char) * strlen(args->nameserver));
+        strcpy(tmp, args->nameserver);
         tmp++;
         tmp[strlen(tmp)-1] = '\0';
         ns = ldns_rdf_new_frm_str(type, tmp);
     } else{
-        ns = ldns_rdf_new_frm_str(type, args.nameserver);
+        ns = ldns_rdf_new_frm_str(type, args->nameserver);
     }
 
     // create a resolver structure
@@ -110,10 +111,10 @@ int prepare_dns_packet(struct arguments args, void *buffer){
     // push a new nameserver to the resolver
     ldns_resolver_push_nameserver(res, ns);
     // set the port the resolver should use
-    ldns_resolver_set_port(res, args.port);
+    ldns_resolver_set_port(res, args->port);
 
     // create the DNS packet
-    q = ldns_pkt_query_new(domain, ldns_get_rr_type_by_name(args.record_type), ldns_get_rr_class_by_name(args.class), LDNS_RD);
+    q = ldns_pkt_query_new(domain, ldns_get_rr_type_by_name(args->record_type), ldns_get_rr_class_by_name(args->class), LDNS_RD);
 
     buf = ldns_buffer_new(512);
 
@@ -252,7 +253,7 @@ int main(int argc, char **argv) {
     if(args.class == NULL) args.class = "IN";
     if(args.port == -1) args.port = 8000;
 
-    int returnCode = 0;
+    int return_code = 0;
     coap_context_t* context = NULL;
     coap_session_t* session = NULL;
     coap_pdu_t* pdu = NULL;
@@ -278,7 +279,7 @@ int main(int argc, char **argv) {
     int len = coap_split_uri((const unsigned char *)server_uri, strlen(server_uri), &uri);
     if (len != 0) {
         coap_log_warn("Failed to parse uri '%s'\n", server_uri);
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
 
@@ -302,7 +303,7 @@ int main(int argc, char **argv) {
 
     if (!(context = coap_new_context(NULL))) {
         coap_log_warn("Could not create CoAP context!\n");
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
 
@@ -330,7 +331,7 @@ int main(int argc, char **argv) {
     session = coap_new_client_session(context, NULL, &dst, COAP_PROTO_UDP);
     if (!session) {
         coap_log_warn("Could not create CoAP session!\n");
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
     // register response handler which is called when a CoAP packet is received
@@ -345,7 +346,7 @@ int main(int argc, char **argv) {
     );
     if (!pdu) {
         printf("Could not create CoAP PDU!\n");
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
 
@@ -358,14 +359,14 @@ int main(int argc, char **argv) {
     int res = coap_uri_into_options(&uri, &dst, &optlist, 1, buffer, DNS_PACKET_SIZE);
     if (res < 0) {
         printf("Failed to create options!\n");
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
 
     // https://datatracker.ietf.org/doc/html/rfc7252#section-5.10
     // 553 = application/dns-message
     // buffer needs at least size 2
-    len = coap_encode_var_safe(buffer, DNS_PACKET_SIZE, 553);
+    len = coap_encode_var_safe(buffer, DNS_PACKET_SIZE, DIGDOC_CF_DNS);
 
     // add optlist to the given optlist_chain
     coap_insert_optlist(&optlist, coap_new_optlist(COAP_OPTION_CONTENT_FORMAT, len, buffer));
@@ -375,16 +376,16 @@ int main(int argc, char **argv) {
     res = coap_add_optlist_pdu(pdu, &optlist);
     if (res == 0) {
         printf("Failed to add options to PDU!\n");
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
 
     // prepare the DNS packet
-    len = prepare_dns_packet(args, buffer);
+    len = prepare_dns_packet(&args, buffer);
 
     if (len < 0) {
         printf("Failed to build DNS packet!\n");
-        returnCode = 1;
+        return_code = 1;
         goto cleanup;
     }
 
@@ -403,5 +404,5 @@ int main(int argc, char **argv) {
     if(context) coap_free_context(context);
     coap_cleanup();
 
-    return returnCode;
+    return return_code;
 }

@@ -14,7 +14,7 @@
 `gcc main.c -o digdoc -lcoap-3-gnutls -lldns`
 
 ### Running Tests
-`./test.sh`
+`./testing/test.sh`
 
 Note: Since testing for hardcoded IP-addresses is not meaningful, we assume that the DNS lookup utility *dig* correctly works and compare its results with the results of *digdoc*. 
 
