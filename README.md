@@ -11,7 +11,9 @@
 - install aiodns-proxy: `pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/`
 
 ### Build the project
-`gcc main.c -o digdoc -lcoap-3-gnutls -lldns`
+- open project root folder
+- generate build-files `cmake .`
+- build `make`
 
 ### Running Tests
 `./testing/test.sh`
