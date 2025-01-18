@@ -33,6 +33,8 @@ aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" 
 
 sleep 3
 
-./testing/test.py
+cd testing
+
+pytest
 
 pkill aiodns-proxy
