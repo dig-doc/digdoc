@@ -18,7 +18,7 @@ def send_query(digdoc_cmd, dig_cmd, description):
     return {"client": client_output, "dig": dig_lines}
 
 class TestClass:
-    a_record_result = ""
+    a_record_result = "141.76.119.130"
 
     def test_a_record(self):
         result_dict = send_query("../digdoc @127.0.0.1 agdsn.de A -p 8000", "dig @1.1.1.1 agdsn.de A +short", "Testing A record")
