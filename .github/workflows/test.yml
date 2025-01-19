@@ -18,4 +18,4 @@ jobs:
     steps:
     # Runs a single command using the runners shell
     - name: testing
-      run: ./testing/test.sh
+      run: ../testing/test.sh
