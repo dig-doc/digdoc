@@ -11,7 +11,8 @@ else
     # Check if the source file exists
     if [ -f "$SOURCE_FILE" ]; then
         # Compile the source file
-        gcc "$SOURCE_FILE" -o "$OUTPUT_BINARY" -L/usr/lib/x86_64-linux-gnu -lcoap-3-gnutls -L/usr/lib/x86_64-linux-gnu -lldns
+        cmake .
+        make
 
         # Check if compilation was successful
         if [ $? -eq 0 ]; then
