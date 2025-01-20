@@ -47,6 +47,7 @@ digdoc
 *.su
 *.idb
 *.pdb
+testing/*.txt
 
 # Kernel Module Compile Results
 *.mod*
