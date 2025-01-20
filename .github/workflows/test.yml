@@ -32,4 +32,10 @@ jobs:
 
     - name: Running test
       run: ./testing/test.sh
-        
+
+    - name: Print debugging files
+      run: |
+        for file in testing/*.txt; do
+          echo "File: $file"
+          cat "$file"
+        done
