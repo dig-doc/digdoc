@@ -17,7 +17,6 @@ bool empty_ack = false;
 void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
     ldns_rr_list *rr_list = ldns_pkt_question(pkt);
     if(rr_list->_rr_count > 0){
-        empty_ack = false;
         printf("\n;; QUESTION SECTION:\n;");
     }
     ldns_rr_list_print(stdout, rr_list);
