@@ -56,6 +56,7 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_
         empty_ack = true;
     }
 
+    printf("ack? %d\n", empty_ack);
     const uint8_t *buffer;
     size_t len, off, total;
     // put the received message in a buffer -> just use the body which is "normal" DNS
