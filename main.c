@@ -404,6 +404,10 @@ int main(int argc, char **argv) {
     // send the CoAP packet
     coap_send(session, pdu);
     // wait for receiving a CoAP response
+    while (!coap_io_pending(context)){
+        // sleep for 20ms
+        usleep(20000);
+    }
     coap_io_process(context, COAP_IO_WAIT);
     printf("empty ack: %d\n", empty_ack);
     if(empty_ack) coap_io_process(context, COAP_IO_WAIT);
