@@ -404,6 +404,7 @@ int main(int argc, char **argv) {
     coap_send(session, pdu);
     // wait for receiving a CoAP response
     coap_io_process(context, COAP_IO_WAIT);
+    printf("empty ack: %d\n", empty_ack);
     if(empty_ack) coap_io_process(context, COAP_IO_WAIT);
 
     cleanup:
