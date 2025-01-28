@@ -281,6 +281,37 @@ static struct argp argp = {
         "A commandline tool that sends a DNS request over CoAP to a server", // Program documentation
 };
 
+static void
+nack_handler(coap_session_t *session COAP_UNUSED,
+             const coap_pdu_t *sent,
+             const coap_nack_reason_t reason,
+             const coap_mid_t mid COAP_UNUSED) {
+    if (sent) {
+        coap_bin_const_t token = coap_pdu_get_token(sent);
+    }
+
+    switch (reason) {
+        case COAP_NACK_TOO_MANY_RETRIES:
+        case COAP_NACK_NOT_DELIVERABLE:
+        case COAP_NACK_TLS_FAILED:
+        case COAP_NACK_WS_FAILED:
+        case COAP_NACK_TLS_LAYER_FAILED:
+        case COAP_NACK_WS_LAYER_FAILED:
+            coap_log_err("cannot send CoAP pdu\n");
+            break;
+        case COAP_NACK_RST:
+            coap_log_info("received RST pdu response\n");
+            break;
+        case COAP_NACK_BAD_RESPONSE:
+            coap_log_info("received bad response pdu\n");
+            break;
+        case COAP_NACK_ICMP_ISSUE:
+        default:
+            ;
+    }
+    return;
+}
+
 /**
  * @brief main function
  *
@@ -394,6 +425,7 @@ int main(int argc, char **argv) {
     }
     // register response handler which is called when a CoAP packet is received
     coap_register_response_handler(context, handle_response);
+    coap_register_nack_handler(context, nack_handler);
 
     // create a PDU = Protocol Data Unit
     pdu = coap_pdu_init(
@@ -451,7 +483,7 @@ int main(int argc, char **argv) {
     coap_add_data(pdu, len, buffer);
     // timer for query time
     start = clock();
-    printf("PDU ack: %d\n", coap_pdu_get_type(pdu));
+    printf("PDU ack: %d, session: %d\n", coap_pdu_get_type(pdu), session);
     // send the CoAP packet
     coap_send(session, pdu);
     // wait for receiving a CoAP response
