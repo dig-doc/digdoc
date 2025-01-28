@@ -28,13 +28,13 @@ class TestClass:
     a_record_result = "141.76.119.130"
 
     def test_a_record(self):
-        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de A -p 8000", "dig @1.1.1.1 agdsn.de A +short", "A")
+        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de A -p 8000 -v", "dig @1.1.1.1 agdsn.de A +short", "A")
         for line in result_dict.get('dig'):
             TestClass.a_record_result = line
             assert line in result_dict.get('client')
 
     def test_aaaa_record(self):
-        result_dict = send_query("../digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000", "dig @1.1.1.1 ftp.agdsn.de AAAA +short", "AAAA")
+        result_dict = send_query("../digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000 -v", "dig @1.1.1.1 ftp.agdsn.de AAAA +short", "AAAA")
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
@@ -42,21 +42,21 @@ class TestClass:
         segments = TestClass.a_record_result.split(".")
         reversed_segments = segments[::-1]
         reversed_ip = ".".join(reversed_segments)
-        result_dict = send_query(f"../digdoc @127.0.0.1 {reversed_ip}.in-addr.arpa PTR -p 8000", f"dig @1.1.1.1 -x {TestClass.a_record_result} +short", "PTR")
+        result_dict = send_query(f"../digdoc @127.0.0.1 {reversed_ip}.in-addr.arpa PTR -p 8000 -v", f"dig @1.1.1.1 -x {TestClass.a_record_result} +short", "PTR")
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
     def test_txt_record(self):
-        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de TXT -p 8000", "dig @1.1.1.1 agdsn.de TXT +short", "TXT")
+        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de TXT -p 8000 -v", "dig @1.1.1.1 agdsn.de TXT +short", "TXT")
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
     def test_mx_record(self):
-        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de MX -p 8000", "dig @1.1.1.1 agdsn.de MX +short", "MX")
+        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de MX -p 8000 -v", "dig @1.1.1.1 agdsn.de MX +short", "MX")
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
     def test_ns_record(self):
-        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de NS -p 8000", "dig @1.1.1.1 agdsn.de NS +short", "NS")
+        result_dict = send_query("../digdoc @127.0.0.1 agdsn.de NS -p 8000 -v", "dig @1.1.1.1 agdsn.de NS +short", "NS")
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
