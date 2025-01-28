@@ -281,15 +281,6 @@ static struct argp argp = {
         "A commandline tool that sends a DNS request over CoAP to a server", // Program documentation
 };
 
-static void
-nack_handler(coap_session_t *session COAP_UNUSED,
-             const coap_pdu_t *sent,
-             const coap_nack_reason_t reason,
-             const coap_mid_t mid COAP_UNUSED) {
-    coap_log_debug("nack_handler\n");
-    return;
-}
-
 /**
  * @brief main function
  *
@@ -461,14 +452,11 @@ int main(int argc, char **argv) {
     coap_add_data(pdu, len, buffer);
     // timer for query time
     start = clock();
-    printf("PDU ack: %d, session: %d\n", coap_pdu_get_type(pdu), session);
     // send the CoAP packet
     coap_send(session, pdu);
     // wait for receiving a CoAP response
-    int error = coap_io_process(context, COAP_IO_WAIT);
-    printf("PDU ack: %d\n", coap_pdu_get_type(pdu));
-    printf("empty ack: %d, error: %d\n", empty_ack, error);
-    if(empty_ack) coap_io_process(context, COAP_IO_WAIT);
+    coap_io_process(context, COAP_IO_WAIT);
+    coap_io_process(context, COAP_IO_WAIT);
 
     cleanup:
     if(optlist) coap_delete_optlist(optlist);
