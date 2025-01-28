@@ -13,7 +13,16 @@
 clock_t start;
 bool empty_ack = false;
 
-// access the DNS packet and print it
+/**
+ * @brief print response
+ *
+ * This function prints the DNS response separated in sections.
+ *
+ * \param[in] pkt contains the raw DNS packet
+ * \param[in] dns_length is the size of the DNS packet
+ * \param[in] query_time is the time between sending a DoC packet and receiving a response in microseconds
+ */
+
 void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
     ldns_rr_list *rr_list = ldns_pkt_question(pkt);
     if(rr_list->_rr_count > 0){
@@ -42,7 +51,17 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
     printf("\n;; DNS PKT SIZE rcvd: %ld\n", dns_length);
 }
 
-// function that is automatically called when a CoAP response is received
+/**
+ * @brief handle response
+ *
+ * This function is automatically called when a DoC packet was received.
+ *
+ * @note session, sent_pdu and message_id are not used but need to be included in the coap_response_handler_t of libcoap
+ *
+ * \param[in] received_pdu encapsulates the received message
+ * \return COAP_RESPONSE_OK if the response is fine
+ */
+
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_pdu, const coap_pdu_t *received_pdu, const coap_mid_t message_id) {
     clock_t end = clock();
 
@@ -89,7 +108,16 @@ struct arguments {
     int port;
 };
 
-// build a "normal" DNS packet for putting it in the body of a CoAP packet
+/**
+ * @brief build DNS packet
+ *
+ * This function builds a "normal" DNS packet for putting it in the body of a CoAP packet.
+ *
+ * \param[in] args contains the commandline arguments from the user
+ * \param[out] buffer store the DNS packet that is build here
+ * \return the length of the DNS packet
+ */
+
 int prepare_dns_packet(struct arguments *args, void *buffer){
     ldns_resolver *res;     // keeps a list of nameservers, and can perform queries for us
     ldns_rdf *domain;       // store the name the user specifies when calling the program
@@ -147,7 +175,18 @@ static struct argp_option options[] = {
         { 0 }
 };
 
-// Function to parse options
+/**
+ * @brief parse options
+ *
+ * This function parses the commandline arguments from the user.
+ *
+ * \param[in] key indicates the type of argument or action, i.e. a specific character or a constant defined by the argp library
+ * \param[in] arg points to the argument value associated with key
+ * \param[in] state provides the state of the argument parser, e.g. the current argument index
+ * \return success or failure of the parsing operation
+ * @retval 0 success
+ * @retval other Non-zero: predefined error codes
+ */
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct arguments *args = state->input;
 
@@ -242,6 +281,17 @@ static struct argp argp = {
         "A commandline tool that sends a DNS request over CoAP to a server", // Program documentation
 };
 
+/**
+ * @brief main function
+ *
+ * This function prepares the commandline argument, sets up libcoap, sends the CoD packet and waits for a response.
+ *
+ * \param[in] argc stores the number of commandline arguments passed by the user including the name of the program
+ * \param[in] argv is an array of character pointers listing all the arguments
+ * \return success or failure of the program
+ * @retval 0 success
+ * @retval 1 failure
+ */
 int main(int argc, char **argv) {
     struct arguments args;
     args.verbose = 0;
@@ -404,10 +454,6 @@ int main(int argc, char **argv) {
     // send the CoAP packet
     coap_send(session, pdu);
     // wait for receiving a CoAP response
-    while (!coap_io_pending(context)){
-        // sleep for 20ms
-        usleep(20000);
-    }
     coap_io_process(context, COAP_IO_WAIT);
     printf("empty ack: %d\n", empty_ack);
     if(empty_ack) coap_io_process(context, COAP_IO_WAIT);

@@ -71,7 +71,7 @@ pip install pexpect
 pip install pytest
 
 # run the aiodns-proxy which expects CoAP (from digdoc), dig directly communicates with the Cloudflare DNS server
-aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" "" > /dev/null 2>&1 &
+aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" "" -v DEBUG> testing/aiodns_log.txt 2>&1 &
 
 sleep 3
 
