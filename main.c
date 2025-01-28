@@ -286,29 +286,7 @@ nack_handler(coap_session_t *session COAP_UNUSED,
              const coap_pdu_t *sent,
              const coap_nack_reason_t reason,
              const coap_mid_t mid COAP_UNUSED) {
-    if (sent) {
-        coap_bin_const_t token = coap_pdu_get_token(sent);
-    }
-
-    switch (reason) {
-        case COAP_NACK_TOO_MANY_RETRIES:
-        case COAP_NACK_NOT_DELIVERABLE:
-        case COAP_NACK_TLS_FAILED:
-        case COAP_NACK_WS_FAILED:
-        case COAP_NACK_TLS_LAYER_FAILED:
-        case COAP_NACK_WS_LAYER_FAILED:
-            coap_log_err("cannot send CoAP pdu\n");
-            break;
-        case COAP_NACK_RST:
-            coap_log_info("received RST pdu response\n");
-            break;
-        case COAP_NACK_BAD_RESPONSE:
-            coap_log_info("received bad response pdu\n");
-            break;
-        case COAP_NACK_ICMP_ISSUE:
-        default:
-            ;
-    }
+    coap_log_debug("nack_handler\n");
     return;
 }
 
