@@ -394,7 +394,6 @@ int main(int argc, char **argv) {
     }
     // register response handler which is called when a CoAP packet is received
     coap_register_response_handler(context, handle_response);
-    coap_register_nack_handler(context, nack_handler);
 
     // create a PDU = Protocol Data Unit
     pdu = coap_pdu_init(
