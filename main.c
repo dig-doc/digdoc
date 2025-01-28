@@ -294,7 +294,7 @@ static struct argp argp = {
         options,      // options list
         parse_opt,    // function to parse options
         "[@server] [domain] [record_type]", // Program usage pattern
-        "A commandline tool that sends a DNS request over CoAP to a server", // Program documentation
+        "A command-line tool that sends a DNS request over CoAP to a server", // Program documentation
 };
 
 /**
