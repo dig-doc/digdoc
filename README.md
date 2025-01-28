@@ -2,6 +2,8 @@
 
 *digdoc* is a lightweight command-line tool written in C that acts as a DNS-over-CoAP (DoC) client. Since most common DNS servers do not natively support CoAP, digdoc currently uses the aiodns-proxy project to translate CoAP packets into standard UDP-based DNS queries.
 
+Note: An API documentation for implementation details can be found at `./sphinx/build/index.html`
+
 ## Prerequisites:
 
 - basic building tools: python3.12-venv, autoconf

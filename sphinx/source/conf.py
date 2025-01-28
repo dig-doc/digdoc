@@ -6,9 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'digdoc - commandline tool'
-copyright = '2025, FLM'
-author = 'FLM'
+project = 'digdoc command-line tool'
+copyright = '2025, Fabian Krusch, Leonie Seelisch, Markus Ziehe'
+author = 'Fabian Krusch, Leonie Seelisch, Markus Ziehe'
 release = '0.1'
 
 # -- General configuration ---------------------------------------------------
@@ -27,8 +27,8 @@ exclude_patterns = []
 html_theme = 'classic'
 html_static_path = ['_static']
 
-# -- Breathe
+# -- Breathe _________________________________________________________________
 
-breathe_projects = {"digdoc - commandline tool": "/home/leonie/Git/coap/digdoc/xml"}
-breathe_default_project = "digdoc - commandline tool"
+breathe_projects = {"digdoc command-line tool": "../xml"}
+breathe_default_project = "digdoc command-line tool"
 
