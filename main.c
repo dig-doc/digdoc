@@ -11,7 +11,7 @@
 #define DIGDOC_CF_DNS 553U
 
 clock_t start;
-bool empty_ack = false;
+bool handler_called = false;
 
 /**
  * @brief print response
@@ -31,19 +31,16 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
     ldns_rr_list_print(stdout, rr_list);
     rr_list = ldns_pkt_answer(pkt);
     if(rr_list->_rr_count > 0){
-        empty_ack = false;
         printf("\n;; ANSWER SECTION:\n");
     }
     ldns_rr_list_print(stdout, rr_list);
     rr_list = ldns_pkt_authority(pkt);
     if(rr_list->_rr_count > 0){
-        empty_ack = false;
         printf("\n;; AUTHORITY SECTION:\n");
     }
     ldns_rr_list_print(stdout, rr_list);
     rr_list = ldns_pkt_additional(pkt);
     if(rr_list->_rr_count > 0){
-        empty_ack = false;
         printf("\n;; ADDITIONAL SECTION:\n");
     }
     ldns_rr_list_print(stdout, rr_list);
@@ -63,6 +60,7 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time){
  */
 
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_pdu, const coap_pdu_t *received_pdu, const coap_mid_t message_id) {
+    handler_called = true;
     clock_t end = clock();
 
     // not used here but need to be in function arguments
@@ -71,11 +69,7 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_
     (void) message_id;
 
     coap_show_pdu(LOG_INFO, received_pdu);
-    if(coap_pdu_get_type(received_pdu) == COAP_MESSAGE_ACK){
-        empty_ack = true;
-    }
 
-    printf("ack? %d\n", empty_ack);
     const uint8_t *buffer;
     size_t len, off, total;
     // put the received message in a buffer -> just use the body which is "normal" DNS
@@ -454,8 +448,7 @@ int main(int argc, char **argv) {
     // send the CoAP packet
     coap_send(session, pdu);
     // wait for receiving a CoAP response
-    coap_io_process(context, COAP_IO_WAIT);
-    coap_io_process(context, COAP_IO_WAIT);
+    while (!handler_called) coap_io_process(context, COAP_IO_WAIT);
 
     cleanup:
     if(optlist) coap_delete_optlist(optlist);
