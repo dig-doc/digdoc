@@ -451,10 +451,12 @@ int main(int argc, char **argv) {
     coap_add_data(pdu, len, buffer);
     // timer for query time
     start = clock();
+    printf("PDU ack: %d\n", coap_pdu_get_type(pdu));
     // send the CoAP packet
     coap_send(session, pdu);
     // wait for receiving a CoAP response
     int error = coap_io_process(context, COAP_IO_WAIT);
+    printf("PDU ack: %d\n", coap_pdu_get_type(pdu));
     printf("empty ack: %d, error: %d\n", empty_ack, error);
     if(empty_ack) coap_io_process(context, COAP_IO_WAIT);
 
