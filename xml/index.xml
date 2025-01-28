@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.9.8" xml:lang="en-US">
+  <compound refid="structarguments" kind="struct"><name>arguments</name>
+    <member refid="structarguments_1a3b313bac6002bf05856450c8018a77bd" kind="variable"><name>nameserver</name></member>
+    <member refid="structarguments_1ad941a64ebc71bcaf401ab1344b87be0f" kind="variable"><name>domain</name></member>
+    <member refid="structarguments_1a423ca1f508d8c15ecc341390bfde7acb" kind="variable"><name>record_type</name></member>
+    <member refid="structarguments_1a2279904b4b741913caedb0f0ebcca77f" kind="variable"><name>class</name></member>
+    <member refid="structarguments_1af26be46c71f5dceb1a990d05b926c7ec" kind="variable"><name>verbose</name></member>
+    <member refid="structarguments_1abf613f9a109eced9ad07de94e1c33856" kind="variable"><name>port</name></member>
+  </compound>
+  <compound refid="main_8c" kind="file"><name>main.c</name>
+    <member refid="main_8c_1a77051b017b4001cce35823d2753c0d73" kind="define"><name>DNS_PACKET_SIZE</name></member>
+    <member refid="main_8c_1ab98f07e29f1183729279c4609f95d42c" kind="define"><name>DIGDOC_CF_DNS</name></member>
+    <member refid="main_8c_1a42d6a906ce66d6fb751de59ce631abb3" kind="variable"><name>start</name></member>
+    <member refid="main_8c_1ab8c5f797c764ba90231adbb281827530" kind="variable"><name>handler_called</name></member>
+    <member refid="main_8c_1abc1fd3a47aea6a8944038c9100eb9135" kind="variable"><name>options</name></member>
+    <member refid="main_8c_1ab70c96531b1b652d70c221cfaf3207f3" kind="variable"><name>argp</name></member>
+    <member refid="main_8c_1aae49256dbae162a434b52578bc62dcd5" kind="function"><name>print_output</name></member>
+    <member refid="main_8c_1a2801666e3b92f1e054a1f3e306e3694a" kind="function"><name>handle_response</name></member>
+    <member refid="main_8c_1a48a202dcac4f62aada3145d039d893e4" kind="function"><name>prepare_dns_packet</name></member>
+    <member refid="main_8c_1a35ee63236273ebb9325c444cacf00159" kind="function"><name>parse_opt</name></member>
+    <member refid="main_8c_1a3c04138a5bfe5d72780bb7e82a18e627" kind="function"><name>main</name></member>
+  </compound>
+</doxygenindex>

@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="structarguments" kind="struct" language="C++" prot="public">
+    <compoundname>arguments</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structarguments_1a3b313bac6002bf05856450c8018a77bd" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* arguments::nameserver</definition>
+        <argsstring></argsstring>
+        <name>nameserver</name>
+        <qualifiedname>arguments::nameserver</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main.c" line="97" column="10" bodyfile="main.c" bodystart="97" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structarguments_1ad941a64ebc71bcaf401ab1344b87be0f" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* arguments::domain</definition>
+        <argsstring></argsstring>
+        <name>domain</name>
+        <qualifiedname>arguments::domain</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main.c" line="98" column="10" bodyfile="main.c" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structarguments_1a423ca1f508d8c15ecc341390bfde7acb" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* arguments::record_type</definition>
+        <argsstring></argsstring>
+        <name>record_type</name>
+        <qualifiedname>arguments::record_type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main.c" line="99" column="10" bodyfile="main.c" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structarguments_1a2279904b4b741913caedb0f0ebcca77f" prot="public" static="no" mutable="no">
+        <type>char *</type>
+        <definition>char* arguments::class</definition>
+        <argsstring></argsstring>
+        <name>class</name>
+        <qualifiedname>arguments::class</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main.c" line="100" column="10" bodyfile="main.c" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structarguments_1af26be46c71f5dceb1a990d05b926c7ec" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int arguments::verbose</definition>
+        <argsstring></argsstring>
+        <name>verbose</name>
+        <qualifiedname>arguments::verbose</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main.c" line="101" column="9" bodyfile="main.c" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structarguments_1abf613f9a109eced9ad07de94e1c33856" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int arguments::port</definition>
+        <argsstring></argsstring>
+        <name>port</name>
+        <qualifiedname>arguments::port</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="main.c" line="102" column="9" bodyfile="main.c" bodystart="102" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="main.c" line="96" column="1" bodyfile="main.c" bodystart="96" bodyend="103"/>
+    <listofallmembers>
+      <member refid="structarguments_1a2279904b4b741913caedb0f0ebcca77f" prot="public" virt="non-virtual"><scope>arguments</scope><name>class</name></member>
+      <member refid="structarguments_1ad941a64ebc71bcaf401ab1344b87be0f" prot="public" virt="non-virtual"><scope>arguments</scope><name>domain</name></member>
+      <member refid="structarguments_1a3b313bac6002bf05856450c8018a77bd" prot="public" virt="non-virtual"><scope>arguments</scope><name>nameserver</name></member>
+      <member refid="structarguments_1abf613f9a109eced9ad07de94e1c33856" prot="public" virt="non-virtual"><scope>arguments</scope><name>port</name></member>
+      <member refid="structarguments_1a423ca1f508d8c15ecc341390bfde7acb" prot="public" virt="non-virtual"><scope>arguments</scope><name>record_type</name></member>
+      <member refid="structarguments_1af26be46c71f5dceb1a990d05b926c7ec" prot="public" virt="non-virtual"><scope>arguments</scope><name>verbose</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>
