@@ -89,6 +89,8 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_
     // ldnsBuffer in wire format can be converted in a DNS packet
     ldns_buffer2pkt_wire(&pkt, ldns_buffer);
     print_output(pkt, total, ((double) (end - start)) / CLOCKS_PER_SEC * 1000 * 1000);
+    ldns_buffer_free(ldns_buffer);
+    ldns_pkt_free(pkt);
 
     return COAP_RESPONSE_OK;
 }
@@ -132,6 +134,7 @@ int prepare_dns_packet(struct arguments *args, void *buffer) {
         tmp++;
         tmp[strlen(tmp) - 1] = '\0';
         ns = ldns_rdf_new_frm_str(type, tmp);
+        free(--tmp);
     } else {
         ns = ldns_rdf_new_frm_str(type, args->nameserver);
     }
@@ -141,6 +144,7 @@ int prepare_dns_packet(struct arguments *args, void *buffer) {
 
     // push a new nameserver to the resolver
     ldns_resolver_push_nameserver(res, ns);
+    ldns_rdf_deep_free(ns);
     // set the port the resolver should use
     ldns_resolver_set_port(res, args->port);
 
@@ -160,6 +164,10 @@ int prepare_dns_packet(struct arguments *args, void *buffer) {
 
     // copy the local data buffer to the buffer in main
     memcpy(buffer, data, len);
+
+    ldns_resolver_deep_free(res);
+    ldns_pkt_free(q);
+    ldns_buffer_free(buf);
 
     return len;
 }
@@ -200,19 +208,29 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                 // first argument is a nameserver
                 if (arg[0] == '@') {
                     char *test = arg + 1;
+                    enum ldns_enum_rdf_type type;
+                    int value;
+
                     if (test[0] == '[') {
                         char *tmp = malloc(sizeof(char) * strlen(test));
                         strcpy(tmp, test);
                         tmp++;
                         tmp[strlen(tmp) - 1] = '\0';
-                        if (!(ldns_rdf_new_frm_str(LDNS_RDF_TYPE_AAAA, tmp))) {
-                            printf("%s is not a valid IPv6 address\n", test);
-                            exit(1);
-                        }
-                    } else if (!(ldns_rdf_new_frm_str(LDNS_RDF_TYPE_A, test))) {
-                        printf("%s is not a valid IPv4 address\n", test);
+                        type = LDNS_RDF_TYPE_AAAA;
+                        *test = *tmp;
+                        value = 6;
+                        free(--tmp);
+                    } else {
+                        type = LDNS_RDF_TYPE_A;
+                        value = 4;
+                    }
+
+                    ldns_rdf *rdf = ldns_rdf_new_frm_str(type, test);
+                    if(!rdf){
+                        printf("%s is not a valid IPv%d address\n", test, value);
                         exit(1);
                     }
+                    ldns_rdf_deep_free(rdf);
                     args->nameserver = arg + 1; // Skip the '@'
                 } else {    // interpret first argument as domain name, record type or class
                     if (ldns_dname_new_frm_str(arg)) {
@@ -227,8 +245,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                     }
                 }
             } else if (state->arg_num == 1) {   // interpret second argument as domain name, record type or class
-                if (ldns_dname_new_frm_str(arg) && args->domain == NULL) {
+                ldns_rdf *rdf = ldns_dname_new_frm_str(arg);
+                if (rdf && args->domain == NULL) {
                     args->domain = arg;
+                    ldns_rdf_deep_free(rdf);
                 } else if (ldns_get_rr_type_by_name(arg) && args->record_type == NULL) {
                     args->record_type = arg;
                 } else if (ldns_get_rr_class_by_name(arg) && args->class == NULL) {
@@ -349,7 +369,6 @@ int main(int argc, char **argv) {
         fail = false;
         *(&dst) = addr_info->addr;
     }
-    coap_free_address_info(addr_info);
 
     if (fail) {
         coap_log_warn("Failed to resolve address %*.*s\n", (int) uri.host.length, (int) uri.host.length,
@@ -459,6 +478,9 @@ int main(int argc, char **argv) {
     if (optlist) coap_delete_optlist(optlist);
     if (session) coap_session_release(session);
     if (context) coap_free_context(context);
+    if(addr_info) coap_free_address_info(addr_info);
+    if(server_uri) free(server_uri);
+
     coap_cleanup();
 
     return return_code;
