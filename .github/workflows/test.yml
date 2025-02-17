@@ -22,7 +22,7 @@ jobs:
         git clone https://github.com/obgm/libcoap.git
         cd libcoap
         ./autogen.sh
-        ./configure --disable-manpages
+        ./configure --disable-manpages --disable-doxygen
         make
         sudo make install
         cd ..
