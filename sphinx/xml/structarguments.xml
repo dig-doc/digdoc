@@ -15,7 +15,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/leonie/Git/coap/digdoc/main.c" line="100" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="100" bodyend="-1"/>
+        <location file="/home/leonie/Git/coap/digdoc/main.c" line="98" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="98" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structarguments_1ad941a64ebc71bcaf401ab1344b87be0f" prot="public" static="no" mutable="no">
         <type>char *</type>
@@ -29,7 +29,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/leonie/Git/coap/digdoc/main.c" line="101" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="101" bodyend="-1"/>
+        <location file="/home/leonie/Git/coap/digdoc/main.c" line="99" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="99" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structarguments_1a423ca1f508d8c15ecc341390bfde7acb" prot="public" static="no" mutable="no">
         <type>char *</type>
@@ -43,7 +43,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/leonie/Git/coap/digdoc/main.c" line="102" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="102" bodyend="-1"/>
+        <location file="/home/leonie/Git/coap/digdoc/main.c" line="100" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="100" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structarguments_1a2279904b4b741913caedb0f0ebcca77f" prot="public" static="no" mutable="no">
         <type>char *</type>
@@ -57,7 +57,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/leonie/Git/coap/digdoc/main.c" line="103" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="103" bodyend="-1"/>
+        <location file="/home/leonie/Git/coap/digdoc/main.c" line="101" column="10" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="101" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structarguments_1af26be46c71f5dceb1a990d05b926c7ec" prot="public" static="no" mutable="no">
         <type>int</type>
@@ -71,7 +71,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/leonie/Git/coap/digdoc/main.c" line="104" column="9" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="104" bodyend="-1"/>
+        <location file="/home/leonie/Git/coap/digdoc/main.c" line="102" column="9" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="102" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structarguments_1abf613f9a109eced9ad07de94e1c33856" prot="public" static="no" mutable="no">
         <type>int</type>
@@ -85,14 +85,14 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/home/leonie/Git/coap/digdoc/main.c" line="105" column="9" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="105" bodyend="-1"/>
+        <location file="/home/leonie/Git/coap/digdoc/main.c" line="103" column="9" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="103" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>
     </briefdescription>
     <detaileddescription>
     </detaileddescription>
-    <location file="/home/leonie/Git/coap/digdoc/main.c" line="99" column="1" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="99" bodyend="106"/>
+    <location file="/home/leonie/Git/coap/digdoc/main.c" line="97" column="1" bodyfile="/home/leonie/Git/coap/digdoc/main.c" bodystart="97" bodyend="104"/>
     <listofallmembers>
       <member refid="structarguments_1a2279904b4b741913caedb0f0ebcca77f" prot="public" virt="non-virtual"><scope>arguments</scope><name>class</name></member>
       <member refid="structarguments_1ad941a64ebc71bcaf401ab1344b87be0f" prot="public" virt="non-virtual"><scope>arguments</scope><name>domain</name></member>

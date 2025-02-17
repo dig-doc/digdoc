@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="md__2home_2leonie_2Git_2coap_2digdoc_2README" kind="page">
+    <compoundname>md__2home_2leonie_2Git_2coap_2digdoc_2README</compoundname>
+    <title>digdoc</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><anchor id="md__2home_2leonie_2Git_2coap_2digdoc_2README_1autotoc_md0"/> <emphasis>digdoc</emphasis> is a lightweight command-line tool written in C that acts as a DNS-over-CoAP (DoC) client. Since most common DNS servers do not natively support CoAP, digdoc currently uses the aiodns-proxy project to translate CoAP packets into standard UDP-based DNS queries.</para>
+<para>Note: An API documentation for implementation details can be found at <computeroutput>./sphinx/build/index.html</computeroutput></para>
+<sect1 id="md__2home_2leonie_2Git_2coap_2digdoc_2README_1autotoc_md1">
+<title>Prerequisites:</title>
+<para><itemizedlist>
+<listitem><para>basic building tools: python3.12-venv, autoconf</para>
+</listitem><listitem><para>install libraries: <programlisting filename=".sh"><codeline><highlight class="normal">sudo<sp/>apt<sp/>install<sp/>libldns-dev`</highlight></codeline>
+<codeline><highlight class="normal">git<sp/>clone<sp/>https://github.com/obgm/libcoap.git</highlight></codeline>
+<codeline><highlight class="normal">cd<sp/>libcoap</highlight></codeline>
+<codeline><highlight class="normal">./autogen.sh</highlight></codeline>
+<codeline><highlight class="normal">./configure</highlight></codeline>
+<codeline><highlight class="normal">make</highlight></codeline>
+<codeline><highlight class="normal">sudo<sp/>make<sp/>install</highlight></codeline>
+</programlisting></para>
+</listitem><listitem><para>in project root folder create a python virtual environment: <computeroutput>python -m venv .venv</computeroutput></para>
+</listitem><listitem><para>activate the venv: <computeroutput>source .venv/bin/activate</computeroutput></para>
+</listitem><listitem><para>install aiodns-proxy: <computeroutput>pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+<sect2 id="md__2home_2leonie_2Git_2coap_2digdoc_2README_1autotoc_md2">
+<title>Build the project</title>
+<para><itemizedlist>
+<listitem><para>generate build-files <computeroutput>cmake .</computeroutput></para>
+</listitem><listitem><para>build <computeroutput>make</computeroutput></para>
+</listitem></itemizedlist>
+</para>
+</sect2>
+<sect2 id="md__2home_2leonie_2Git_2coap_2digdoc_2README_1autotoc_md3">
+<title>Running Tests</title>
+<para><computeroutput>./testing/test.sh</computeroutput></para>
+<para>Note: Since testing for hardcoded IP-addresses is not meaningful, we assume that the DNS lookup utility <emphasis>dig</emphasis> correctly works and compare its results with the results of <emphasis>digdoc</emphasis>.</para>
+</sect2>
+</sect1>
+<sect1 id="md__2home_2leonie_2Git_2coap_2digdoc_2README_1autotoc_md4">
+<title>run aiodns-proxy:</title>
+<para>run the aiodns-proxy using the CoAP protocol for reaching e.g. via port 8000 the Cloudflare DNS server:</para>
+<para><computeroutput>aiodns-proxy --coap localhost 8000 --upstream-dns 1.1.1.1 --dtls-credentials &quot;&quot; &quot;&quot;</computeroutput></para>
+<para>Note: for using IPv6, replace <computeroutput>localhost</computeroutput> with <computeroutput>::1</computeroutput></para>
+</sect1>
+<sect1 id="md__2home_2leonie_2Git_2coap_2digdoc_2README_1autotoc_md5">
+<title>run didoc:</title>
+<para>in a second terminal, digdoc can be used e.g. like that:</para>
+<para><computeroutput>./digdoc @127.0.0.1 example.org A</computeroutput></para>
+<para>Note:<itemizedlist>
+<listitem><para>the default record type is <computeroutput>A</computeroutput> and the default domain is <computeroutput>example.org</computeroutput></para>
+</listitem><listitem><para>the default port is <computeroutput>8000</computeroutput>, if aiodns-proxy uses another, e.g. port <computeroutput>1234</computeroutput>, add this here as an argument:</para>
+</listitem></itemizedlist>
+</para>
+<para><computeroutput>./digdoc @127.0.0.1 example.org A -p 1234</computeroutput></para>
+<para><itemizedlist>
+<listitem><para>for using IPv6, replace <computeroutput>@127.0.0.1</computeroutput> with <computeroutput>&quot;@[::1]&quot;</computeroutput> </para>
+</listitem></itemizedlist>
+</para>
+</sect1>
+    </detaileddescription>
+    <location file="/home/leonie/Git/coap/digdoc/README.md"/>
+  </compounddef>
+</doxygen>

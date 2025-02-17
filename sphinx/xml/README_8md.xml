@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="README_8md" kind="file" language="Markdown">
+    <compoundname>README.md</compoundname>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline><highlight class="normal">#<sp/>digdoc</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">*digdoc*<sp/>is<sp/>a<sp/>lightweight<sp/>command-line<sp/>tool<sp/>written<sp/>in<sp/>C<sp/>that<sp/>acts<sp/>as<sp/>a<sp/>DNS-over-CoAP<sp/>(DoC)<sp/>client.<sp/>Since<sp/>most<sp/>common<sp/>DNS<sp/>servers<sp/>do<sp/>not<sp/>natively<sp/>support<sp/>CoAP,<sp/>digdoc<sp/>currently<sp/>uses<sp/>the<sp/>aiodns-proxy<sp/>project<sp/>to<sp/>translate<sp/>CoAP<sp/>packets<sp/>into<sp/>standard<sp/>UDP-based<sp/>DNS<sp/>queries.</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Note:<sp/>An<sp/>API<sp/>documentation<sp/>for<sp/>implementation<sp/>details<sp/>can<sp/>be<sp/>found<sp/>at<sp/>`./sphinx/build/index.html`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>Prerequisites:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>basic<sp/>building<sp/>tools:<sp/>python3.12-venv,<sp/>autoconf</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>install<sp/>libraries:</highlight></codeline>
+<codeline><highlight class="normal"><sp/>```sh</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>sudo<sp/>apt<sp/>install<sp/>libldns-dev`</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>git<sp/>clone<sp/>https://github.com/obgm/libcoap.git</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>cd<sp/>libcoap</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>./autogen.sh</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>./configure</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>make</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/>sudo<sp/>make<sp/>install</highlight></codeline>
+<codeline><highlight class="normal"><sp/>```</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>in<sp/>project<sp/>root<sp/>folder<sp/>create<sp/>a<sp/>python<sp/>virtual<sp/>environment:<sp/>`python<sp/>-m<sp/>venv<sp/>.venv`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>activate<sp/>the<sp/>venv:<sp/>`source<sp/>.venv/bin/activate`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>install<sp/>aiodns-proxy:<sp/>`pip<sp/>install<sp/>git+https://github.com/anr-bmbf-pivot/aiodnsprox/`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Build<sp/>the<sp/>project</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>generate<sp/>build-files<sp/>`cmake<sp/>.`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>build<sp/>`make`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">###<sp/>Running<sp/>Tests</highlight></codeline>
+<codeline><highlight class="normal">`./testing/test.sh`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Note:<sp/>Since<sp/>testing<sp/>for<sp/>hardcoded<sp/>IP-addresses<sp/>is<sp/>not<sp/>meaningful,<sp/>we<sp/>assume<sp/>that<sp/>the<sp/>DNS<sp/>lookup<sp/>utility<sp/>*dig*<sp/>correctly<sp/>works<sp/>and<sp/>compare<sp/>its<sp/>results<sp/>with<sp/>the<sp/>results<sp/>of<sp/>*digdoc*.<sp/></highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>run<sp/>aiodns-proxy:</highlight></codeline>
+<codeline><highlight class="normal">run<sp/>the<sp/>aiodns-proxy<sp/>using<sp/>the<sp/>CoAP<sp/>protocol<sp/>for<sp/>reaching<sp/>e.g.<sp/>via<sp/>port<sp/>8000<sp/>the<sp/>Cloudflare<sp/>DNS<sp/>server:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`aiodns-proxy<sp/>--coap<sp/>localhost<sp/>8000<sp/>--upstream-dns<sp/>1.1.1.1<sp/>--dtls-credentials<sp/>&quot;&quot;<sp/>&quot;&quot;`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Note:<sp/>for<sp/>using<sp/>IPv6,<sp/>replace<sp/>`localhost`<sp/>with<sp/>`::1`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">##<sp/>run<sp/>didoc:</highlight></codeline>
+<codeline><highlight class="normal">in<sp/>a<sp/>second<sp/>terminal,<sp/>digdoc<sp/>can<sp/>be<sp/>used<sp/>e.g.<sp/>like<sp/>that:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`<sp/>./digdoc<sp/>@127.0.0.1<sp/>example.org<sp/>A`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">Note:</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>the<sp/>default<sp/>record<sp/>type<sp/>is<sp/>`A`<sp/>and<sp/>the<sp/>default<sp/>domain<sp/>is<sp/>`example.org`</highlight></codeline>
+<codeline><highlight class="normal">-<sp/>the<sp/>default<sp/>port<sp/>is<sp/>`8000`,<sp/>if<sp/>aiodns-proxy<sp/>uses<sp/>another,<sp/>e.g.<sp/>port<sp/>`1234`,<sp/>add<sp/>this<sp/>here<sp/>as<sp/>an<sp/>argument:</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">`<sp/>./digdoc<sp/>@127.0.0.1<sp/>example.org<sp/>A<sp/>-p<sp/>1234`</highlight></codeline>
+<codeline></codeline>
+<codeline><highlight class="normal">-<sp/>for<sp/>using<sp/>IPv6,<sp/>replace<sp/>`@127.0.0.1`<sp/>with<sp/>`&quot;@[::1]&quot;`</highlight></codeline>
+    </programlisting>
+    <location file="/home/leonie/Git/coap/digdoc/README.md"/>
+  </compounddef>
+</doxygen>

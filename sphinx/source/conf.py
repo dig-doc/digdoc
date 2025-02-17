@@ -9,7 +9,7 @@
 project = 'digdoc command-line tool'
 copyright = '2025, Fabian Krusch, Leonie Seelisch, Markus Ziehe'
 author = 'Fabian Krusch, Leonie Seelisch, Markus Ziehe'
-release = '0.1'
+release = '1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -31,4 +31,3 @@ html_static_path = ['_static']
 
 breathe_projects = {"digdoc command-line tool": "../xml"}
 breathe_default_project = "digdoc command-line tool"
-
