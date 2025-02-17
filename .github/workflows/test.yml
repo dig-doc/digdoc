@@ -18,7 +18,14 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libcoap3-dev libldns-dev
+        sudo apt-get install -y libldns-dev
+        git clone https://github.com/obgm/libcoap.git
+        cd libcoap
+        ./autogen.sh
+        ./configure --disable-manpages
+        make
+        sudo make install
+        cd ..
 
     - name: Set up Python
       uses: actions/setup-python@v4
