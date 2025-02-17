@@ -474,6 +474,9 @@ int main(int argc, char **argv) {
     int processing_return = 0;
     processing_return = coap_send_recv(session, pdu, &resp_pdu, 3000);
     printf("result: %d\n", processing_return);
+    if(processing_return >= 0){
+        handle_response(session, pdu, resp_pdu, coap_pdu_get_mid(pdu));
+    }
     // wait for receiving a CoAP response
     /*while (!handler_called && processing_return != -1) {
         if(coap_can_exit(context)) printf("can!\n");
