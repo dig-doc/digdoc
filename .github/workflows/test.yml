@@ -25,7 +25,11 @@ jobs:
         ./configure --disable-manpages --disable-doxygen
         make
         sudo make install
+        sudo ldconfig
         cd ..
+
+    - name: Export LD_LIBRARY_PATH
+      run: echo "LD_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
 
     - name: Set up Python
       uses: actions/setup-python@v4
