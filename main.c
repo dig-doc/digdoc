@@ -331,6 +331,7 @@ int main(int argc, char **argv) {
     coap_context_t *context = NULL;
     coap_session_t *session = NULL;
     coap_pdu_t *pdu = NULL;
+    coap_pdu_t *resp_pdu = NULL;
     coap_address_t dst;
     coap_uri_t uri;
     coap_addr_info_t *addr_info;
@@ -467,18 +468,20 @@ int main(int argc, char **argv) {
     // add the DNS packet to the body of the CoAP packet
     coap_add_data(pdu, len, buffer);
     // timer for query time
-    start = clock();
+    // TODO: start = clock();
     // send the CoAP packet
-    coap_send(session, pdu);
+    // coap_send(session, pdu);
     int processing_return = 0;
+    processing_return = coap_send_recv(session, pdu, &resp_pdu, 3000);
+    printf("result: %d\n", processing_return);
     // wait for receiving a CoAP response
-    while (!handler_called && processing_return != -1) {
+    /*while (!handler_called && processing_return != -1) {
         if(coap_can_exit(context)) printf("can!\n");
         else printf("cant\n");
         processing_return = coap_io_process(context, COAP_IO_WAIT);
         if(coap_can_exit(context)) printf("can!\n");
         else printf("cant\n");
-    }
+    }*/
 
     cleanup:
     if (optlist) coap_delete_optlist(optlist);
