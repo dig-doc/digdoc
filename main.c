@@ -472,7 +472,13 @@ int main(int argc, char **argv) {
     coap_send(session, pdu);
     int processing_return = 0;
     // wait for receiving a CoAP response
-    while (!handler_called && processing_return != -1) processing_return = coap_io_process(context, COAP_IO_WAIT);
+    while (!handler_called && processing_return != -1) {
+        if(coap_can_exit(context)) printf("can!\n");
+        else printf("cant\n");
+        processing_return = coap_io_process(context, COAP_IO_WAIT);
+        if(coap_can_exit(context)) printf("can!\n");
+        else printf("cant\n");
+    }
 
     cleanup:
     if (optlist) coap_delete_optlist(optlist);
