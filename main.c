@@ -11,7 +11,7 @@
 #define DIGDOC_CF_DNS 553U
 #define QUERY_TIMEOUT 3000U
 
-clock_t start;
+int qu_time;
 
 /**
  * @brief print response
@@ -44,7 +44,7 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time) {
         printf("\n;; ADDITIONAL SECTION:\n");
     }
     ldns_rr_list_print(stdout, rr_list);
-    printf("\n;; Query time: %dus", query_time);
+    printf("\n;; Query time: %dms", query_time);
     printf("\n;; DNS PKT SIZE rcvd: %ld\n", dns_length);
 }
 
@@ -61,7 +61,6 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time) {
 
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_pdu, const coap_pdu_t *received_pdu,
                                 const coap_mid_t message_id) {
-    clock_t end = clock();
 
     // not used here but need to be in function arguments
     (void) session;
@@ -87,7 +86,7 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_
     ldns_buffer_write(ldns_buffer, data, len);
     // ldnsBuffer in wire format can be converted in a DNS packet
     ldns_buffer2pkt_wire(&pkt, ldns_buffer);
-    print_output(pkt, total, ((double) (end - start)) / CLOCKS_PER_SEC * 1000 * 1000);
+    print_output(pkt, total, qu_time);
     ldns_buffer_free(ldns_buffer);
     ldns_pkt_free(pkt);
 
@@ -466,11 +465,9 @@ int main(int argc, char **argv) {
 
     // add the DNS packet to the body of the CoAP packet
     coap_add_data(pdu, len, buffer);
-    int processing_return = 0;
-    // timer for query time
-    start = clock();
-    processing_return = coap_send_recv(session, pdu, &resp_pdu, QUERY_TIMEOUT);
+    int processing_return = coap_send_recv(session, pdu, &resp_pdu, QUERY_TIMEOUT);
     if(processing_return >= 0){
+        qu_time = processing_return;
         handle_response(session, pdu, resp_pdu, coap_pdu_get_mid(pdu));
     } else{
         switch (processing_return) {
