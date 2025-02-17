@@ -82,5 +82,4 @@ exit_status=$?
 
 pkill aiodns-proxy
 
-#exit $exit_status
-exit 0
+exit $exit_status

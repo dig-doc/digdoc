@@ -7,13 +7,21 @@ Note: An API documentation for implementation details can be found at `./sphinx/
 ## Prerequisites:
 
 - basic building tools: python3.12-venv, autoconf
-- install libraries: `sudo apt install libcoap3-dev libldns-dev`
-- create a python virtual environment: `python -m venv .venv`
+- install libraries:
+ ```sh
+    sudo apt install libldns-dev`
+    git clone https://github.com/obgm/libcoap.git
+    cd libcoap
+    ./autogen.sh
+    ./configure
+    make
+    sudo make install
+ ```
+- in project root folder create a python virtual environment: `python -m venv .venv`
 - activate the venv: `source .venv/bin/activate`
 - install aiodns-proxy: `pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/`
 
 ### Build the project
-- open project root folder
 - generate build-files `cmake .`
 - build `make`
 

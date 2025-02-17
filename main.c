@@ -9,9 +9,9 @@
 
 #define DNS_PACKET_SIZE 512U
 #define DIGDOC_CF_DNS 553U
+#define QUERY_TIMEOUT 3000U
 
 clock_t start;
-bool handler_called = false;
 
 /**
  * @brief print response
@@ -61,7 +61,6 @@ void print_output(ldns_pkt *pkt, size_t dns_length, int query_time) {
 
 coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_pdu, const coap_pdu_t *received_pdu,
                                 const coap_mid_t message_id) {
-    handler_called = true;
     clock_t end = clock();
 
     // not used here but need to be in function arguments
@@ -467,24 +466,37 @@ int main(int argc, char **argv) {
 
     // add the DNS packet to the body of the CoAP packet
     coap_add_data(pdu, len, buffer);
-    // timer for query time
-    // TODO: start = clock();
-    // send the CoAP packet
-    // coap_send(session, pdu);
     int processing_return = 0;
-    processing_return = coap_send_recv(session, pdu, &resp_pdu, 3000);
-    printf("result: %d\n", processing_return);
+    // timer for query time
+    start = clock();
+    processing_return = coap_send_recv(session, pdu, &resp_pdu, QUERY_TIMEOUT);
     if(processing_return >= 0){
         handle_response(session, pdu, resp_pdu, coap_pdu_get_mid(pdu));
+    } else{
+        switch (processing_return) {
+            case -1:
+                printf("Invalid timeout parameter\n");
+                break;
+            case -2:
+                printf("Failed to transmit PDU\n");
+                break;
+            case -3:
+                printf("Nack or Event handler invoked, cancelling request\n");
+                break;
+            case -4:
+                printf("coap_io_process returned error (fail to re-lock or select())\n");
+                break;
+            case -5:
+                printf("Response not received in the given time. Try increasing QUERY_TIMEOUT.\n");
+                break;
+            case -6:
+                printf("Terminated by user\n");
+                break;
+            case -7:
+                printf("Client mode code not enabled\n");
+                break;
+        }
     }
-    // wait for receiving a CoAP response
-    /*while (!handler_called && processing_return != -1) {
-        if(coap_can_exit(context)) printf("can!\n");
-        else printf("cant\n");
-        processing_return = coap_io_process(context, COAP_IO_WAIT);
-        if(coap_can_exit(context)) printf("can!\n");
-        else printf("cant\n");
-    }*/
 
     cleanup:
     if (optlist) coap_delete_optlist(optlist);
