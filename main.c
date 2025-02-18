@@ -84,7 +84,6 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_
     uint64_t pkt_size = DNS_PACKET_SIZE;
     if(len > DNS_PACKET_SIZE){
         pkt_size = (len + 511) & ~511;
-        printf("Adapting buffer size\n");
     }
     ldns_buffer = ldns_buffer_new(pkt_size);
     // write data in an ldnsBuffer
