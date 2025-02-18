@@ -81,7 +81,12 @@ coap_response_t handle_response(coap_session_t *session, const coap_pdu_t *sent_
 
     ldns_buffer *ldns_buffer;
     ldns_pkt *pkt;
-    ldns_buffer = ldns_buffer_new(DNS_PACKET_SIZE);
+    uint64_t pkt_size = DNS_PACKET_SIZE;
+    if(len > DNS_PACKET_SIZE){
+        pkt_size = (len + 511) & ~511;
+        printf("Adapting buffer size\n");
+    }
+    ldns_buffer = ldns_buffer_new(pkt_size);
     // write data in an ldnsBuffer
     ldns_buffer_write(ldns_buffer, data, len);
     // ldnsBuffer in wire format can be converted in a DNS packet
@@ -150,7 +155,11 @@ int prepare_dns_packet(struct arguments *args, void *buffer) {
     q = ldns_pkt_query_new(domain, ldns_get_rr_type_by_name(args->record_type), ldns_get_rr_class_by_name(args->class),
                            LDNS_RD);
 
-    buf = ldns_buffer_new(512);
+    if(q->_size > DNS_PACKET_SIZE){
+        printf("Request too long. Try increasing DNS_PACKET_SIZE\n");
+        exit(1);
+    }
+    buf = ldns_buffer_new(DNS_PACKET_SIZE);
 
     // convert the packet in a buffer in wire format
     ldns_pkt2buffer_wire(buf, q);
