@@ -154,7 +154,6 @@ int prepare_dns_packet(struct arguments *args, void *buffer) {
     q = ldns_pkt_query_new(domain, ldns_get_rr_type_by_name(args->record_type), ldns_get_rr_class_by_name(args->class),
                            LDNS_RD);
 
-    ldns_pkt_set_edns_do(q, 0);
     ldns_pkt_set_edns_udp_size(q, 4096);
 
     if(q->_size > DNS_PACKET_SIZE){
