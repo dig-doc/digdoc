@@ -19,6 +19,7 @@ Note: An API documentation for implementation details can be found at `./sphinx/
 
 ### Running Tests
 `./testing/test.sh`
+Note: To run them with a local Mock-Server: `TEST_LOCALLY=1 ./testing/test.sh`
 
 Note: Since testing for hardcoded IP-addresses is not meaningful, we assume that the DNS lookup utility *dig* correctly works and compare its results with the results of *digdoc*. 
 

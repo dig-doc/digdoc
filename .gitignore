@@ -41,6 +41,7 @@ build/
 *.x86_64
 *.hex
 digdoc
+local_test_server
 
 # Debug files
 *.dSYM/
