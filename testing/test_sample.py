@@ -28,25 +28,44 @@ def ip(pytestconfig):
     """Fixture to get IP address from the command line."""
     return pytestconfig.getoption("ip")
 
+@pytest.fixture
+def v(pytestconfig):
+    """Fixture to get verbose output"""
+    return pytestconfig.getoption("v")
+
 class TestClass:
     a_record_result = "141.76.119.130"
 
-    def test_a_record(self, ip):
-        result_dict = send_query(
-            f"../digdoc @127.0.0.1 agdsn.de A -p 8000",
-            f"dig @{ip} agdsn.de A +short",
-            "A"
-        )
+    def test_a_record(self, ip, v):
+        if v:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de A -p 8000 -v",
+                f"dig @{ip} agdsn.de A +short",
+                "A"
+            )
+        else:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de A -p 8000",
+                f"dig @{ip} agdsn.de A +short",
+                "A"
+            )
         for line in result_dict.get('dig'):
             TestClass.a_record_result = line
             assert line in result_dict.get('client')
 
     def test_aaaa_record(self, ip):
-        result_dict = send_query(
-            f"../digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000",
-            f"dig @{ip} ftp.agdsn.de AAAA +short",
-            "AAAA"
-        )
+        if v:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000 -v",
+                f"dig @{ip} ftp.agdsn.de AAAA +short",
+                "AAAA"
+            )
+        else:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 ftp.agdsn.de AAAA -p 8000",
+                f"dig @{ip} ftp.agdsn.de AAAA +short",
+                "AAAA"
+            )
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
@@ -54,37 +73,66 @@ class TestClass:
         segments = TestClass.a_record_result.split(".")
         reversed_segments = segments[::-1]
         reversed_ip = ".".join(reversed_segments)
-        result_dict = send_query(
-            f"../digdoc @127.0.0.1 {reversed_ip}.in-addr.arpa PTR -p 8000",
-            f"dig @{ip} -x {TestClass.a_record_result} +short",
-            "PTR"
-        )
+
+        if v:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 {reversed_ip}.in-addr.arpa PTR -p 8000 -v",
+                f"dig @{ip} -x {TestClass.a_record_result} +short",
+                "PTR"
+            )
+        else:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 {reversed_ip}.in-addr.arpa PTR -p 8000",
+                f"dig @{ip} -x {TestClass.a_record_result} +short",
+                "PTR"
+            )
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
     def test_txt_record(self, ip):
-        result_dict = send_query(
-            f"../digdoc @127.0.0.1 agdsn.de TXT -p 8000",
-            f"dig @{ip} agdsn.de TXT +short",
-            "TXT"
-        )
+        if v:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de TXT -p 8000 -v",
+                f"dig @{ip} agdsn.de TXT +short",
+                "TXT"
+            )
+        else:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de TXT -p 8000",
+                f"dig @{ip} agdsn.de TXT +short",
+                "TXT"
+            )
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
     def test_mx_record(self, ip):
-        result_dict = send_query(
-            f"../digdoc @127.0.0.1 agdsn.de MX -p 8000",
-            f"dig @{ip} agdsn.de MX +short",
-            "MX"
-        )
+        if v:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de MX -p 8000 -v",
+                f"dig @{ip} agdsn.de MX +short",
+                "MX"
+            )
+        else:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de MX -p 8000",
+                f"dig @{ip} agdsn.de MX +short",
+                "MX"
+            )
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')
 
     def test_ns_record(self, ip):
-        result_dict = send_query(
-            f"../digdoc @127.0.0.1 agdsn.de NS -p 8000",
-            f"dig @{ip} agdsn.de NS +short",
-            "NS"
-        )
+        if v:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de NS -p 8000 -v",
+                f"dig @{ip} agdsn.de NS +short",
+                "NS"
+            )
+        else:
+            result_dict = send_query(
+                f"../digdoc @127.0.0.1 agdsn.de NS -p 8000",
+                f"dig @{ip} agdsn.de NS +short",
+                "NS"
+            )
         for line in result_dict.get('dig'):
             assert line in result_dict.get('client')

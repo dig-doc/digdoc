@@ -7,6 +7,12 @@ TEST_SERVER_SOURCE="testing/local_test_server.c"
 TEST_SERVER_BINARY="testing/local_test_server"
 VENV_DIR=".venv"
 TEST_LOCALLY="${TEST_LOCALLY:-0}"
+VERBOSE="${VERBOSE:-0}"
+REQUIRED_PACKAGES=("pytest" "pexpect")
+
+if [ "$VERBOSE" -eq "1" ]; then
+  set -x
+fi
 
 # Check if the binary exists
 if [ -f "$OUTPUT_BINARY" ]; then
@@ -17,7 +23,12 @@ else
     # Check if the source file exists
     if [ -f "$SOURCE_FILE" ]; then
         # Compile the source file
-        cmake .
+        if [ "$VERBOSE" -eq "1" ]; then
+          cmake -DCMAKE_VERBOSE_MAKEFILE=ON .
+        else
+          cmake .
+        fi
+
         make
 
         # Check if compilation was successful
@@ -44,7 +55,12 @@ if [ "$TEST_LOCALLY" -eq "1" ]; then
       # Check if the source file exists
       if [ -f "$TEST_SERVER_SOURCE" ]; then
           # Compile the source file
-          cmake -DLOCAL_TESTING=ON .
+          if [ "$VERBOSE" -eq "1" ]; then
+              cmake -DLOCAL_TESTING=ON -DCMAKE_VERBOSE_MAKEFILE=ON .
+          else
+              cmake -DLOCAL_TESTING=ON .
+          fi
+
           make
 
           # Check if compilation was successful
@@ -70,7 +86,11 @@ if [[ -z "$VIRTUAL_ENV" ]]; then
         echo "Virtual environment directory '$VENV_DIR' not found. Creating one..."
 
         # Create the virtual environment
-        python3 -m venv "$VENV_DIR"
+        if [ "$VERBOSE" -eq "1" ]; then
+            python3 -v -m venv "$VENV_DIR"
+        else
+            python3 -m venv "$VENV_DIR"
+        fi
 
         if [[ $? -eq 0 ]]; then
             echo "Virtual environment created successfully in '$VENV_DIR'."
@@ -91,21 +111,36 @@ if [[ -z "$VIRTUAL_ENV" ]]; then
         echo "Failed to activate virtual environment. Exiting."
         exit 1
     fi
-    pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/
 else
     echo "Virtual environment is already activated: $VIRTUAL_ENV"
 fi
 
+if ! pip show "aiodnsprox" > /dev/null 2>&1; then
+    echo "aiodnsprox not installed. To install it, run: pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/"
+    exit 1
+fi
 
-
-pip install pexpect
-pip install pytest
+for PACKAGE in "${REQUIRED_PACKAGES[@]}"; do
+    if ! pip show "$PACKAGE" > /dev/null 2>&1; then
+        echo "$PACKAGE not installed. To install missing packages, run: pip install -r testing/requirements.txt"
+        exit 1
+    fi
+done
 
 if [ "$TEST_LOCALLY" -eq 1 ]; then
-    ./local_test_server > /dev/null 2>&1 &
-    aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 127.0.0.2 8000 --dtls-credentials "" ""> /dev/null 2>&1 &
+    if [ "$VERBOSE" -eq "1" ]; then
+        ./local_test_server > testing/local_test_server.txt 2>&1 &
+        aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 127.0.0.2 8000 --dtls-credentials "" "" -v DEBUG> testing/aiodnsprox.txt 2>&1 &
+    else
+        ./local_test_server > /dev/null 2>&1 &
+        aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 127.0.0.2 8000 --dtls-credentials "" ""> /dev/null 2>&1 &
+    fi
 else
-    aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" ""> /dev/null 2>&1 &
+    if [ "$VERBOSE" -eq "1" ]; then
+        aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" "" -v DEBUG> testing/aiodnsprox.txt 2>&1 &
+    else
+        aiodns-proxy --coap 127.0.0.1 8000 --upstream-dns 1.1.1.1 --dtls-credentials "" ""> /dev/null 2>&1 &
+    fi
 fi
 
 sleep 3

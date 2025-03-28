@@ -7,19 +7,21 @@ Note: An API documentation for implementation details can be found at `./sphinx/
 ## Prerequisites:
 
 - basic building tools: python3.12-venv, autoconf
-- install libraries: `sudo apt install libcoap3-dev libldns-dev`
+- install libraries: [libcoap3](https://libcoap.net/), [ldns](https://github.com/NLnetLabs/ldns)
+  - e.g. for Debian-based systems: `apt install libcoap3-dev libldns-dev`
 - create a python virtual environment: `python -m venv .venv`
 - activate the venv: `source .venv/bin/activate`
-- install aiodns-proxy: `pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/`
+- install [aiodns-proxy](https://github.com/anr-bmbf-pivot/aiodnsprox/): `pip install git+https://github.com/anr-bmbf-pivot/aiodnsprox/`
 
 ### Build the project
 - open project root folder
 - generate build-files `cmake .`
 - build `make`
 
-### Running Tests
-`./testing/test.sh`
-Note: To run them with a local Mock-Server: `TEST_LOCALLY=1 ./testing/test.sh`
+### Testing
+- install python test dependencies: `pip install -r testing/requirements.txt`
+- run tests: `./testing/test.sh`
+  - run them with a local mock-server: `TEST_LOCALLY=1 ./testing/test.sh`
 
 Note: Since testing for hardcoded IP-addresses is not meaningful, we assume that the DNS lookup utility *dig* correctly works and compare its results with the results of *digdoc*. 
 

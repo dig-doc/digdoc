@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <ldns/ldns.h>
+#include <signal.h>
 
 #define DNS_PORT 8000
 #define BUFFER_SIZE 512
@@ -77,7 +78,19 @@ unsigned char NS_answer[] = {
         0x73, 0x31, 0xc0, 0x0c
 };
 
+void handle_sigterm(int sig){
+    exit(EXIT_FAILURE);
+}
+
+void flush_output(){
+    fflush(stdout);
+    fflush(stderr);
+}
+
 int main() {
+    signal(SIGTERM, handle_sigterm);
+    atexit(flush_output);
+
     int sock_fd;
     struct sockaddr_in server_addr, client_addr;
     unsigned char buffer[BUFFER_SIZE];
@@ -91,6 +104,8 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    printf("Socket successfully created\n");
+
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.2");
     server_addr.sin_port = htons(DNS_PORT);
@@ -101,15 +116,22 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    printf("Binding was successful\n");
+
     printf("DNS mock server running on port %d...\n", DNS_PORT);
 
     while (1) {
         socklen_t addr_len = sizeof(client_addr);
         int recv_len = recvfrom(sock_fd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&client_addr, &addr_len);
 
-        printf("message length: %d\n", recv_len);
+        printf("Received message length: %d\nMessage:\n", recv_len);
 
         uint8_t *data2 = (uint8_t *) buffer;
+        for(int i = 0; i < recv_len; i++){
+            printf("0x%02X ", data2[i]);
+        }
+        printf("\n");
+
         const uint16_t *data = (const uint16_t *) buffer;
         ldns_buffer *ldns_buffer;
         ldns_pkt *pkt;
@@ -152,7 +174,16 @@ int main() {
         answer[0] = data2[0];
         answer[1] = data2[1];
 
+        printf("Answer message:\n");
+
+        uint8_t *data3 = (uint8_t *) answer;
+        for(size_t i = 0; i < answer_size; i++){
+            printf("0x%02X ", data3[i]);
+        }
+        printf("\n");
+
         if (recv_len > 0) {
+            printf("Sending answer\n");
             sendto(sock_fd, answer, answer_size, 0, (struct sockaddr *)&client_addr, addr_len);
         }
     }

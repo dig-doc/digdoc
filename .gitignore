@@ -49,6 +49,7 @@ local_test_server
 *.idb
 *.pdb
 testing/*.txt
+!testing/requirements.txt
 
 # Kernel Module Compile Results
 *.mod*
