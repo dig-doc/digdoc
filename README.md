@@ -37,7 +37,7 @@ run the aiodns-proxy using the CoAP protocol for reaching e.g. via port 8000 the
 
 Note: for using IPv6, replace `localhost` with `::1`
 
-## run didoc:
+## run digdoc:
 in a second terminal, digdoc can be used e.g. like that:
 
 ` ./digdoc @127.0.0.1 example.org A`
